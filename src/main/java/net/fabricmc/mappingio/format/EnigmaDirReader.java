@@ -36,7 +36,7 @@ public final class EnigmaDirReader {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				if (file.getFileName().toString().endsWith("." + MappingFormat.ENIGMA.fileExt)) {
-					EnigmaReader.read(Files.newBufferedReader(file), visitor);
+					EnigmaReader.read(Files.newBufferedReader(file), sourceNs, targetNs, visitor);
 				}
 
 				return FileVisitResult.CONTINUE;

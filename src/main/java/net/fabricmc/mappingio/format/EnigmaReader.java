@@ -30,7 +30,11 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 public final class EnigmaReader {
 	public static void read(Reader reader, MappingVisitor visitor) throws IOException {
-		read(new ColumnFileReader(reader, ' '), MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor);
+		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor);
+	}
+
+	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
+		read(new ColumnFileReader(reader, ' '), sourceNs, targetNs, visitor);
 	}
 
 	public static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
