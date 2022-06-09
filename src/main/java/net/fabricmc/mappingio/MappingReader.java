@@ -26,14 +26,14 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
-import net.fabricmc.mappingio.format.EnigmaDirReader;
-import net.fabricmc.mappingio.format.EnigmaReader;
 import net.fabricmc.mappingio.format.MappingFormat;
-import net.fabricmc.mappingio.format.ProGuardReader;
-import net.fabricmc.mappingio.format.SrgReader;
-import net.fabricmc.mappingio.format.Tiny1Reader;
-import net.fabricmc.mappingio.format.Tiny2Reader;
-import net.fabricmc.mappingio.format.TsrgReader;
+import net.fabricmc.mappingio.format.enigma.EnigmaDirReader;
+import net.fabricmc.mappingio.format.enigma.EnigmaReader;
+import net.fabricmc.mappingio.format.proguard.ProGuardReader;
+import net.fabricmc.mappingio.format.srg.SrgReader;
+import net.fabricmc.mappingio.format.tiny1.Tiny1Reader;
+import net.fabricmc.mappingio.format.tiny2.Tiny2Reader;
+import net.fabricmc.mappingio.format.tsrg.TsrgReader;
 
 public final class MappingReader {
 	public static MappingFormat detectFormat(Path file) throws IOException {
