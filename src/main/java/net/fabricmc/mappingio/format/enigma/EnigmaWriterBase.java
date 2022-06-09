@@ -27,7 +27,7 @@ import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingWriter;
 
 abstract class EnigmaWriterBase implements MappingWriter {
-	public EnigmaWriterBase(Writer writer) throws IOException {
+	EnigmaWriterBase(Writer writer) throws IOException {
 		this.writer = writer;
 	}
 
