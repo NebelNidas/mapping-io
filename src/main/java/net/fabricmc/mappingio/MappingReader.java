@@ -38,7 +38,7 @@ import net.fabricmc.mappingio.format.tsrg.TsrgReader;
 public final class MappingReader {
 	public static MappingFormat detectFormat(Path file) throws IOException {
 		if (Files.isDirectory(file)) {
-			return MappingFormat.ENIGMA;
+			return MappingFormat.ENIGMA_DIR;
 		} else {
 			try (Reader reader = new InputStreamReader(Files.newInputStream(file), StandardCharsets.UTF_8)) {
 				return detectFormat(reader);
