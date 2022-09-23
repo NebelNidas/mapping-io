@@ -26,8 +26,8 @@ import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.format.enigma.EnigmaDirWriter;
 import net.fabricmc.mappingio.format.enigma.EnigmaFileWriter;
 import net.fabricmc.mappingio.format.proguard.ProGuardFileWriter;
-import net.fabricmc.mappingio.format.tiny1.Tiny1FileWriter;
-import net.fabricmc.mappingio.format.tiny2.Tiny2FileWriter;
+import net.fabricmc.mappingio.format.tiny.Tiny1FileWriter;
+import net.fabricmc.mappingio.format.tiny.Tiny2FileWriter;
 
 public interface MappingWriter extends Closeable, MappingVisitor {
 	static MappingWriter create(Path file, MappingFormat format) throws IOException {

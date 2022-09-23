@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import net.fabricmc.mappingio.format.tiny2.Tiny2Util;
+import net.fabricmc.mappingio.format.tiny.Tiny2Util;
 
 @ApiStatus.Internal
 public final class ColumnFileReader implements Closeable {

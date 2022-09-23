@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.fabricmc.mappingio.format.tiny2;
+package net.fabricmc.mappingio.format.tiny;
 
 import java.io.IOException;
 import java.io.Writer;
