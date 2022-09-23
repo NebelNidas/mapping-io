@@ -44,9 +44,9 @@ public interface MappingWriter extends Closeable, MappingVisitor {
 		if (!format.hasSingleFile()) throw new IllegalArgumentException("format "+format+" is not applicable to a single writer");
 
 		switch (format) {
-		case TINY: return new Tiny1Writer(writer);
-		case TINY_2: return new Tiny2Writer(writer, false);
-		case ENIGMA: return new EnigmaWriter(writer);
+		case TINY_FILE: return new Tiny1Writer(writer);
+		case TINY_2_FILE: return new Tiny2Writer(writer, false);
+		case ENIGMA_FILE: return new EnigmaWriter(writer);
 		default: throw new UnsupportedOperationException("format "+format+" is not implemented");
 		}
 	}

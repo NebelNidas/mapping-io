@@ -60,26 +60,26 @@ public final class MappingReader {
 
 		switch (String.valueOf(buffer, 0, 3)) {
 		case "v1\t":
-			return MappingFormat.TINY;
+			return MappingFormat.TINY_FILE;
 		case "tin":
-			return MappingFormat.TINY_2;
+			return MappingFormat.TINY_2_FILE;
 		case "tsr": // tsrg2 <nsA> <nsB> ..<nsN>
-			return MappingFormat.TSRG2;
+			return MappingFormat.TSRG_2_FILE;
 		case "CLA":
-			return MappingFormat.ENIGMA;
+			return MappingFormat.ENIGMA_FILE;
 		case "PK:":
 		case "CL:":
 		case "MD:":
 		case "FD:":
-			return MappingFormat.SRG;
+			return MappingFormat.SRG_FILE;
 		}
 
 		String headerStr = String.valueOf(buffer, 0, pos);
 
 		if (headerStr.contains(" -> ")) {
-			return MappingFormat.PROGUARD;
+			return MappingFormat.PROGUARD_FILE;
 		} else if (headerStr.contains("\n\t")) {
-			return MappingFormat.TSRG;
+			return MappingFormat.TSRG_FILE;
 		}
 
 		return null; // unknown format or corrupted
@@ -119,11 +119,11 @@ public final class MappingReader {
 
 		if (format.hasNamespaces) {
 			switch (format) {
-			case TINY:
+			case TINY_FILE:
 				return Tiny1Reader.getNamespaces(reader);
-			case TINY_2:
+			case TINY_2_FILE:
 				return Tiny2Reader.getNamespaces(reader);
-			case TSRG2:
+			case TSRG_2_FILE:
 				return TsrgReader.getNamespaces(reader);
 			default:
 				throw new IllegalStateException();
@@ -152,7 +152,7 @@ public final class MappingReader {
 			case ENIGMA_DIR:
 				EnigmaDirReader.read(file, visitor);
 				break;
-			case MCP:
+			case MCP_DIR:
 				throw new UnsupportedOperationException(); // TODO: implement
 			default:
 				throw new IllegalStateException();
@@ -174,23 +174,23 @@ public final class MappingReader {
 		}
 
 		switch (format) {
-		case TINY:
+		case TINY_FILE:
 			Tiny1Reader.read(reader, visitor);
 			break;
-		case TINY_2:
+		case TINY_2_FILE:
 			Tiny2Reader.read(reader, visitor);
 			break;
-		case ENIGMA:
+		case ENIGMA_FILE:
 			EnigmaReader.read(reader, visitor);
 			break;
-		case SRG:
+		case SRG_FILE:
 			SrgReader.read(reader, visitor);
 			break;
-		case TSRG:
-		case TSRG2:
+		case TSRG_FILE:
+		case TSRG_2_FILE:
 			TsrgReader.read(reader, visitor);
 			break;
-		case PROGUARD:
+		case PROGUARD_FILE:
 			ProGuardReader.read(reader, visitor);
 			break;
 		default:
