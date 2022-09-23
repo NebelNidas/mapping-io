@@ -28,12 +28,12 @@ import java.util.List;
 
 import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.format.enigma.EnigmaDirReader;
-import net.fabricmc.mappingio.format.enigma.EnigmaReader;
-import net.fabricmc.mappingio.format.proguard.ProGuardReader;
-import net.fabricmc.mappingio.format.srg.SrgReader;
-import net.fabricmc.mappingio.format.tiny1.Tiny1Reader;
-import net.fabricmc.mappingio.format.tiny2.Tiny2Reader;
-import net.fabricmc.mappingio.format.tsrg.TsrgReader;
+import net.fabricmc.mappingio.format.enigma.EnigmaFileReader;
+import net.fabricmc.mappingio.format.proguard.ProGuardFileReader;
+import net.fabricmc.mappingio.format.srg.SrgFileReader;
+import net.fabricmc.mappingio.format.tiny1.Tiny1FileReader;
+import net.fabricmc.mappingio.format.tiny2.Tiny2FileReader;
+import net.fabricmc.mappingio.format.tsrg.TsrgFileReader;
 
 public final class MappingReader {
 	public static MappingFormat detectFormat(Path file) throws IOException {
@@ -120,11 +120,11 @@ public final class MappingReader {
 		if (format.hasNamespaces) {
 			switch (format) {
 			case TINY_FILE:
-				return Tiny1Reader.getNamespaces(reader);
+				return Tiny1FileReader.getNamespaces(reader);
 			case TINY_2_FILE:
-				return Tiny2Reader.getNamespaces(reader);
+				return Tiny2FileReader.getNamespaces(reader);
 			case TSRG_2_FILE:
-				return TsrgReader.getNamespaces(reader);
+				return TsrgFileReader.getNamespaces(reader);
 			default:
 				throw new IllegalStateException();
 			}
@@ -175,23 +175,23 @@ public final class MappingReader {
 
 		switch (format) {
 		case TINY_FILE:
-			Tiny1Reader.read(reader, visitor);
+			Tiny1FileReader.read(reader, visitor);
 			break;
 		case TINY_2_FILE:
-			Tiny2Reader.read(reader, visitor);
+			Tiny2FileReader.read(reader, visitor);
 			break;
 		case ENIGMA_FILE:
-			EnigmaReader.read(reader, visitor);
+			EnigmaFileReader.read(reader, visitor);
 			break;
 		case SRG_FILE:
-			SrgReader.read(reader, visitor);
+			SrgFileReader.read(reader, visitor);
 			break;
 		case TSRG_FILE:
 		case TSRG_2_FILE:
-			TsrgReader.read(reader, visitor);
+			TsrgFileReader.read(reader, visitor);
 			break;
 		case PROGUARD_FILE:
-			ProGuardReader.read(reader, visitor);
+			ProGuardFileReader.read(reader, visitor);
 			break;
 		default:
 			throw new IllegalStateException();
