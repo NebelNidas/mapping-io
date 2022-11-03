@@ -28,6 +28,7 @@ import net.fabricmc.mappingio.format.enigma.EnigmaFileWriter;
 import net.fabricmc.mappingio.format.proguard.ProGuardFileWriter;
 import net.fabricmc.mappingio.format.tiny.Tiny1FileWriter;
 import net.fabricmc.mappingio.format.tiny.Tiny2FileWriter;
+import net.fabricmc.mappingio.format.tiny2.Tiny2DirWriter;
 
 public interface MappingWriter extends Closeable, MappingVisitor {
 	static MappingWriter create(Path file, MappingFormat format) throws IOException {
@@ -35,6 +36,7 @@ public interface MappingWriter extends Closeable, MappingVisitor {
 			return create(Files.newBufferedWriter(file), format);
 		} else {
 			switch (format) {
+			case TINY_2_DIR: return new Tiny2DirWriter(file, true);
 			case ENIGMA_DIR: return new EnigmaDirWriter(file, true);
 			default: throw new UnsupportedOperationException("format "+format+" is not implemented");
 			}

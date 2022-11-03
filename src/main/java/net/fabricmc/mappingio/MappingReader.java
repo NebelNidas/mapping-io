@@ -21,8 +21,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,21 +36,48 @@ import net.fabricmc.mappingio.format.enigma.EnigmaFileReader;
 import net.fabricmc.mappingio.format.proguard.ProGuardFileReader;
 import net.fabricmc.mappingio.format.srg.SrgFileReader;
 import net.fabricmc.mappingio.format.tiny.Tiny1FileReader;
+import net.fabricmc.mappingio.format.tiny.Tiny2DirReader;
 import net.fabricmc.mappingio.format.tiny.Tiny2FileReader;
 import net.fabricmc.mappingio.format.tsrg.TsrgFileReader;
 
 public final class MappingReader {
-	public static MappingFormat detectFormat(Path file) throws IOException {
-		if (Files.isDirectory(file)) {
-			return MappingFormat.ENIGMA_DIR;
+	public static MappingFormat detectFormat(Path path, boolean fullCertaintyForDirs) throws IOException {
+		List<MappingFormat> mappingFormat = new ArrayList<>(1);
+
+		if (Files.isDirectory(path)) {
+			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					boolean recognizedFileExt = false;
+					for (MappingFormat format : MappingFormat.values()) {
+						if (format.fileExt == null) continue;
+						if (file.getFileName().toString().endsWith("." + format.fileExt)) {
+							recognizedFileExt = true;
+							break;
+						}
+					}
+					if (recognizedFileExt) {
+						Reader reader = new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8);
+						if (mappingFormat.isEmpty()) {
+							mappingFormat.set(0, detectFormat(reader, true));
+							if (!fullCertaintyForDirs) {
+								return FileVisitResult.TERMINATE;
+							}
+						} else if (!detectFormat(reader, true).equals(mappingFormat.get(0))) {
+							throw new IOException("Some mapping files in the supplied directory have different file formats!");
+						}
+					}
+					return FileVisitResult.CONTINUE;
+				}
+			});
 		} else {
-			try (Reader reader = new InputStreamReader(Files.newInputStream(file), StandardCharsets.UTF_8)) {
-				return detectFormat(reader);
-			}
+			Reader reader = new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8);
+			mappingFormat.set(0, detectFormat(reader, false));
 		}
+		return mappingFormat.get(0);
 	}
 
-	public static MappingFormat detectFormat(Reader reader) throws IOException {
+	public static MappingFormat detectFormat(Reader reader, boolean mappingDirectory) throws IOException {
 		char[] buffer = new char[DETECT_HEADER_LEN];
 		int pos = 0;
 		int len;
@@ -62,11 +93,11 @@ public final class MappingReader {
 		case "v1\t":
 			return MappingFormat.TINY_FILE;
 		case "tin":
-			return MappingFormat.TINY_2_FILE;
+			return mappingDirectory ? MappingFormat.TINY_2_DIR : MappingFormat.TINY_2;
 		case "tsr": // tsrg2 <nsA> <nsB> ..<nsN>
 			return MappingFormat.TSRG_2_FILE;
 		case "CLA":
-			return MappingFormat.ENIGMA_FILE;
+			return mappingDirectory ? MappingFormat.ENIGMA_DIR : MappingFormat.ENIGMA;
 		case "PK:":
 		case "CL:":
 		case "MD:":
@@ -91,7 +122,7 @@ public final class MappingReader {
 
 	public static List<String> getNamespaces(Path file, MappingFormat format) throws IOException {
 		if (format == null) {
-			format = detectFormat(file);
+			format = detectFormat(file, false);
 			if (format == null) throw new IOException("invalid/unsupported mapping format");
 		}
 
@@ -112,7 +143,7 @@ public final class MappingReader {
 		if (format == null) {
 			if (!reader.markSupported()) reader = new BufferedReader(reader);
 			reader.mark(DETECT_HEADER_LEN);
-			format = detectFormat(reader);
+			format = detectFormat(reader, false);
 			reader.reset();
 			if (format == null) throw new IOException("invalid/unsupported mapping format");
 		}
@@ -139,7 +170,7 @@ public final class MappingReader {
 
 	public static void read(Path file, MappingFormat format, MappingVisitor visitor) throws IOException {
 		if (format == null) {
-			format = detectFormat(file);
+			format = detectFormat(file, false);
 			if (format == null) throw new IOException("invalid/unsupported mapping format");
 		}
 
@@ -149,6 +180,9 @@ public final class MappingReader {
 			}
 		} else {
 			switch (format) {
+			case TINY_2_DIR:
+				Tiny2DirReader.read(file, visitor);
+				break;
 			case ENIGMA_DIR:
 				EnigmaDirReader.read(file, visitor);
 				break;
@@ -168,7 +202,7 @@ public final class MappingReader {
 		if (format == null) {
 			if (!reader.markSupported()) reader = new BufferedReader(reader);
 			reader.mark(DETECT_HEADER_LEN);
-			format = detectFormat(reader);
+			format = detectFormat(reader, false);
 			reader.reset();
 			if (format == null) throw new IOException("invalid/unsupported mapping format");
 		}
