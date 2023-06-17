@@ -149,7 +149,6 @@ public final class ClassAnalysisDescCompleter {
 				throw new IllegalArgumentException(I18n.translate("error.unknown_namespace", namespace));
 			}
 
-
 			this.mappingTree = mappingTree;
 		}
 
