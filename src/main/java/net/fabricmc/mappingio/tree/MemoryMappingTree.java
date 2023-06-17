@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import net.fabricmc.mappingio.I18n;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingVisitor;
@@ -125,7 +126,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 				String newNs = namespaces.get(i);
 
 				if (newNs.equals(srcNamespace)) {
-					throw new IllegalArgumentException("can't use the same namespace for src and dst");
+					throw new IllegalArgumentException(I18n.translate("error.same_ns_for_src_and_dst"));
 				} else {
 					int oldNsIdx = dstNamespaces.indexOf(newNs);
 					nameMap[i] = oldNsIdx;
@@ -279,7 +280,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 
 	private int getSrcNsEquivalent(ElementMapping mapping) {
 		int ret = mapping.getTree().getNamespaceId(srcNamespace);
-		if (ret == NULL_NAMESPACE_ID) throw new UnsupportedOperationException("can't find source namespace in referenced mapping tree");
+		if (ret == NULL_NAMESPACE_ID) throw new UnsupportedOperationException(I18n.translate("error.src_ns_not_in_tree"));
 
 		return ret;
 	}

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 
+import net.fabricmc.mappingio.I18n;
 import net.fabricmc.mappingio.MappingVisitor;
 
 public interface MappingTreeView {
@@ -158,7 +159,9 @@ public interface MappingTreeView {
 					idEnd++;
 				}
 
-				if (idEnd >= end) throw new IllegalArgumentException("invalid descriptor: "+desc.subSequence(start, end));
+				if (idEnd >= end) {
+					throw new IllegalArgumentException(I18n.translate("error.invalid_descriptor", desc.subSequence(start, end)));
+				}
 
 				String cls = desc.subSequence(offset, idEnd).toString();
 				String mappedCls = mapClassName(cls, srcNamespace, dstNamespace);

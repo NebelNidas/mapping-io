@@ -36,20 +36,22 @@ public interface MappingWriter extends Closeable, MappingVisitor {
 		} else {
 			switch (format) {
 			case ENIGMA_DIR: return new EnigmaDirWriter(file, true);
-			default: throw new UnsupportedOperationException("format "+format+" is not implemented");
+			default: throw new UnsupportedOperationException(I18n.translate("error.format_not_implemented", format));
 			}
 		}
 	}
 
 	static MappingWriter create(Writer writer, MappingFormat format) throws IOException {
-		if (!format.hasSingleFile()) throw new IllegalArgumentException("format "+format+" is not applicable to a single writer");
+		if (!format.hasSingleFile()) {
+			throw new IllegalArgumentException(I18n.translate("error.format_not_applicable_to_single_writer", format));
+		}
 
 		switch (format) {
 		case TINY_FILE: return new Tiny1FileWriter(writer);
 		case TINY_2_FILE: return new Tiny2FileWriter(writer, false);
 		case ENIGMA_FILE: return new EnigmaFileWriter(writer);
 		case PROGUARD_FILE: return new ProGuardFileWriter(writer);
-		default: throw new UnsupportedOperationException("format "+format+" is not implemented");
+		default: throw new UnsupportedOperationException(I18n.translate("error.format_not_implemented", format));
 		}
 	}
 }

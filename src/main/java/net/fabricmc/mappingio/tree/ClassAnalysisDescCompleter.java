@@ -38,6 +38,7 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+import net.fabricmc.mappingio.I18n;
 import net.fabricmc.mappingio.tree.MappingTree.ClassMapping;
 import net.fabricmc.mappingio.tree.MappingTree.FieldMapping;
 import net.fabricmc.mappingio.tree.MappingTree.MethodMapping;
@@ -143,7 +144,11 @@ public final class ClassAnalysisDescCompleter {
 			super(Integer.getInteger("mappingIo.asmApiVersion", Opcodes.ASM9));
 
 			this.namespace = namespace != null ? mappingTree.getNamespaceId(namespace) : MappingTreeView.SRC_NAMESPACE_ID;
-			if (this.namespace == MappingTreeView.NULL_NAMESPACE_ID) throw new IllegalArgumentException("Unknown namespace: "+namespace);
+
+			if (this.namespace == MappingTreeView.NULL_NAMESPACE_ID) {
+				throw new IllegalArgumentException(I18n.translate("error.unknown_namespace", namespace));
+			}
+
 
 			this.mappingTree = mappingTree;
 		}

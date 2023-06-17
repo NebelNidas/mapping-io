@@ -18,6 +18,7 @@ package net.fabricmc.mappingio.tree;
 
 import java.util.Collection;
 
+import net.fabricmc.mappingio.I18n;
 import net.fabricmc.mappingio.tree.MappingTree.MethodMapping;
 import net.fabricmc.mappingio.tree.MappingTreeView.MethodMappingView;
 
@@ -29,7 +30,10 @@ public interface HierarchyInfoProvider<T> {
 
 	default T getMethodHierarchy(MethodMappingView method) {
 		int nsId = method.getTree().getNamespaceId(getNamespace());
-		if (nsId == MappingTreeView.NULL_NAMESPACE_ID) throw new IllegalArgumentException("disassociated namespace");
+
+		if (nsId == MappingTreeView.NULL_NAMESPACE_ID) {
+			throw new IllegalArgumentException(I18n.translate("error.disassociated_namespace"));
+		}
 
 		String owner = method.getOwner().getName(nsId);
 		String name = method.getName(nsId);
