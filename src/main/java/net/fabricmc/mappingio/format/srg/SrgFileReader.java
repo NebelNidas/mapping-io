@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.util.Collections;
 import java.util.Set;
 
+import net.fabricmc.mappingio.LocalizedIOException;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingUtil;
@@ -65,7 +66,7 @@ public final class SrgFileReader {
 
 					if (reader.nextCol("CL:")) { // class: CL: <src> <dst>
 						String srcName = reader.nextCol();
-						if (srcName == null || srcName.isEmpty()) throw new IOException("missing class-name-a in line "+reader.getLineNumber());
+						if (srcName == null || srcName.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 						if (!srcName.equals(lastClass)) {
 							lastClass = srcName;
@@ -73,7 +74,7 @@ public final class SrgFileReader {
 
 							if (visitLastClass) {
 								String dstName = reader.nextCol();
-								if (dstName == null || dstName.isEmpty()) throw new IOException("missing class-name-b in line "+reader.getLineNumber());
+								if (dstName == null || dstName.isEmpty()) throw new LocalizedIOException("invalid_or_missing_dst_name", reader.getLineNumber());
 
 								visitor.visitDstName(MappedElementKind.CLASS, 0, dstName);
 								visitLastClass = visitor.visitElementContent(MappedElementKind.CLASS);
@@ -81,25 +82,25 @@ public final class SrgFileReader {
 						}
 					} else if ((isMethod = reader.nextCol("MD:")) || reader.nextCol("FD:")) { // method: MD: <cls-a><name-a> <desc-a> <cls-b><name-b> <desc-b> or field: FD: <cls-a><name-a> <cls-b><name-b>
 						String src = reader.nextCol();
-						if (src == null) throw new IOException("missing class/name a in line "+reader.getLineNumber());
+						if (src == null) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 						int srcSepPos = src.lastIndexOf('/');
-						if (srcSepPos <= 0 || srcSepPos == src.length() - 1) throw new IOException("invalid class/name a in line "+reader.getLineNumber());
+						if (srcSepPos <= 0 || srcSepPos == src.length() - 1) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 						String srcDesc;
 
 						if (isMethod) {
 							srcDesc = reader.nextCol();
-							if (src == null || src.isEmpty()) throw new IOException("missing desc a in line "+reader.getLineNumber());
+							if (src == null || src.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_desc", reader.getLineNumber());
 						} else {
 							srcDesc = null;
 						}
 
 						String dst = reader.nextCol();
-						if (dst == null) throw new IOException("missing class/name b in line "+reader.getLineNumber());
+						if (dst == null) throw new LocalizedIOException("invalid_or_missing_dst_name", reader.getLineNumber());
 
 						int dstSepPos = dst.lastIndexOf('/');
-						if (dstSepPos <= 0 || dstSepPos == dst.length() - 1) throw new IOException("invalid class/name b in line "+reader.getLineNumber());
+						if (dstSepPos <= 0 || dstSepPos == dst.length() - 1) throw new LocalizedIOException("invalid_or_missing_dst_name", reader.getLineNumber());
 
 						String srcOwner = src.substring(0, srcSepPos);
 

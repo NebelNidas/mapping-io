@@ -21,6 +21,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.fabricmc.mappingio.LocalizedIOException;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingVisitor;
@@ -35,7 +36,7 @@ public final class Tiny2FileReader {
 		if (!reader.nextCol("tiny") // magic
 				|| reader.nextIntCol() != 2 // major version
 				|| reader.nextIntCol() < 0) { // minor version
-			throw new IOException("invalid/unsupported tiny file: no tiny 2 header");
+			throw new LocalizedIOException("invalid_or_missing_header");
 		}
 
 		List<String> ret = new ArrayList<>();
@@ -56,7 +57,7 @@ public final class Tiny2FileReader {
 		if (!reader.nextCol("tiny") // magic
 				|| reader.nextIntCol() != 2 // major version
 				|| reader.nextIntCol() < 0) { // minor version
-			throw new IOException("invalid/unsupported tiny file: no tiny 2 header");
+			throw new LocalizedIOException("invalid_or_missing_header");
 		}
 
 		String srcNamespace = reader.nextCol();
@@ -91,7 +92,7 @@ public final class Tiny2FileReader {
 						}
 					} else {
 						String key = reader.nextCol();
-						if (key == null) throw new IOException("missing property key in line "+reader.getLineNumber());
+						if (key == null) throw new LocalizedIOException("invalid_or_missing_property_key", reader.getLineNumber());
 						String value = reader.nextEscapedCol(); // may be missing -> null
 
 						if (key.equals(Tiny2Util.escapedNamesProperty)) {
@@ -107,7 +108,7 @@ public final class Tiny2FileReader {
 				while (reader.nextLine(0)) {
 					if (reader.nextCol("c")) { // class: c <names>...
 						String srcName = reader.nextCol(escapeNames);
-						if (srcName == null || srcName.isEmpty()) throw new IOException("missing class-name-a in line "+reader.getLineNumber());
+						if (srcName == null || srcName.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 						if (visitor.visitClass(srcName)) {
 							readClass(reader, dstNsCount, escapeNames, visitor);
@@ -130,18 +131,18 @@ public final class Tiny2FileReader {
 		while (reader.nextLine(1)) {
 			if (reader.nextCol("f")) { // field: f <descA> <names>...
 				String srcDesc = reader.nextCol(escapeNames);
-				if (srcDesc == null || srcDesc.isEmpty()) throw new IOException("missing field-desc-a in line "+reader.getLineNumber());
+				if (srcDesc == null || srcDesc.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_desc", reader.getLineNumber());
 				String srcName = reader.nextCol(escapeNames);
-				if (srcName == null || srcName.isEmpty()) throw new IOException("missing field-name-a in line "+reader.getLineNumber());
+				if (srcName == null || srcName.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 				if (visitor.visitField(srcName, srcDesc)) {
 					readElement(reader, MappedElementKind.FIELD, dstNsCount, escapeNames, visitor);
 				}
 			} else if (reader.nextCol("m")) { // method: m <descA> <names>...
 				String srcDesc = reader.nextCol(escapeNames);
-				if (srcDesc == null || srcDesc.isEmpty()) throw new IOException("missing method-desc-a in line "+reader.getLineNumber());
+				if (srcDesc == null || srcDesc.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_desc", reader.getLineNumber());
 				String srcName = reader.nextCol(escapeNames);
-				if (srcName == null || srcName.isEmpty()) throw new IOException("missing method-name-a in line "+reader.getLineNumber());
+				if (srcName == null || srcName.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 				if (visitor.visitMethod(srcName, srcDesc)) {
 					readMethod(reader, dstNsCount, escapeNames, visitor);
@@ -159,9 +160,9 @@ public final class Tiny2FileReader {
 		while (reader.nextLine(2)) {
 			if (reader.nextCol("p")) { // method parameter: p <lv-index> <names>...
 				int lvIndex = reader.nextIntCol();
-				if (lvIndex < 0) throw new IOException("missing/invalid parameter lv-index in line "+reader.getLineNumber());
+				if (lvIndex < 0) throw new LocalizedIOException("invalid_or_missing", "lv-index", reader.getLineNumber());
 				String srcName = reader.nextCol(escapeNames);
-				if (srcName == null) throw new IOException("missing var-name-a column in line "+reader.getLineNumber());
+				if (srcName == null) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 				if (srcName.isEmpty()) srcName = null;
 
 				if (visitor.visitMethodArg(-1, lvIndex, srcName)) {
@@ -169,12 +170,12 @@ public final class Tiny2FileReader {
 				}
 			} else if (reader.nextCol("v")) { // method variable: v <lv-index> <lv-start-offset> <optional-lvt-index> <names>...
 				int lvIndex = reader.nextIntCol();
-				if (lvIndex < 0) throw new IOException("missing/invalid variable lv-index in line "+reader.getLineNumber());
+				if (lvIndex < 0) throw new LocalizedIOException("invalid_or_missing", "lv-index", reader.getLineNumber());
 				int startOpIdx = reader.nextIntCol();
-				if (startOpIdx < 0) throw new IOException("missing/invalid variable lv-start-offset in line "+reader.getLineNumber());
+				if (startOpIdx < 0) throw new LocalizedIOException("invalid_or_missing", "lv-start-offset", reader.getLineNumber());
 				int lvtRowIndex = reader.nextIntCol();
 				String srcName = reader.nextCol(escapeNames);
-				if (srcName == null) throw new IOException("missing var-name-a column in line "+reader.getLineNumber());
+				if (srcName == null) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 				if (srcName.isEmpty()) srcName = null;
 
 				if (visitor.visitMethodVar(lvtRowIndex, lvIndex, startOpIdx, -1, srcName)) {
@@ -199,7 +200,7 @@ public final class Tiny2FileReader {
 
 	private static void readComment(ColumnFileReader reader, MappedElementKind subjectKind, MappingVisitor visitor) throws IOException {
 		String comment = reader.nextEscapedCol();
-		if (comment == null) throw new IOException("missing comment in line "+reader.getLineNumber());
+		if (comment == null) throw new LocalizedIOException("invalid_or_missing_comment", reader.getLineNumber());
 
 		visitor.visitComment(subjectKind, comment);
 	}
@@ -207,7 +208,7 @@ public final class Tiny2FileReader {
 	private static void readDstNames(ColumnFileReader reader, MappedElementKind subjectKind, int dstNsCount, boolean escapeNames, MappingVisitor visitor) throws IOException {
 		for (int dstNs = 0; dstNs < dstNsCount; dstNs++) {
 			String name = reader.nextCol(escapeNames);
-			if (name == null) throw new IOException("missing name columns in line "+reader.getLineNumber());
+			if (name == null) throw new LocalizedIOException("missing_columns", reader.getLineNumber());
 
 			if (!name.isEmpty()) visitor.visitDstName(subjectKind, dstNs, name);
 		}

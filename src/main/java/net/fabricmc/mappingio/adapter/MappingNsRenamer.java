@@ -22,13 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import net.fabricmc.mappingio.I18n;
 import net.fabricmc.mappingio.MappingVisitor;
 
 public final class MappingNsRenamer extends ForwardingMappingVisitor {
 	public MappingNsRenamer(MappingVisitor next, Map<String, String> nameMap) {
 		super(next);
 
-		Objects.requireNonNull(nameMap, "null name map");
+		Objects.requireNonNull(nameMap, I18n.translate("error.is_null", "nameMap"));
 
 		this.nameMap = nameMap;
 	}

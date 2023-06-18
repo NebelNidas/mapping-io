@@ -23,6 +23,8 @@ import java.util.Arrays;
 
 import org.jetbrains.annotations.ApiStatus;
 
+import net.fabricmc.mappingio.I18n;
+import net.fabricmc.mappingio.LocalizedIOException;
 import net.fabricmc.mappingio.format.tiny.Tiny2Util;
 
 @ApiStatus.Internal
@@ -211,7 +213,7 @@ public final class ColumnFileReader implements Closeable {
 		try {
 			return str != null ? Integer.parseInt(str) : -1;
 		} catch (NumberFormatException e) {
-			throw new IOException("invalid number in line "+lineNumber+": "+str);
+			throw new LocalizedIOException("invalid_number", str, lineNumber);
 		}
 	}
 
@@ -279,7 +281,7 @@ public final class ColumnFileReader implements Closeable {
 	}
 
 	public void reset() {
-		if (mark < 0) throw new IllegalStateException("not marked");
+		if (mark < 0) throw new IllegalStateException(I18n.translate("error.not_marked"));
 
 		bufferPos = mark;
 	}

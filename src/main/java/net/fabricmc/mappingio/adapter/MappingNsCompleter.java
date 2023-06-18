@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import net.fabricmc.mappingio.LocalizedIOException;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingVisitor;
 
@@ -77,7 +78,7 @@ public final class MappingNsCompleter extends ForwardingMappingVisitor {
 				srcIdx = -1;
 			} else {
 				srcIdx = dstNamespaces.indexOf(src);
-				if (srcIdx < 0) throw new RuntimeException("invalid alternative mapping ns "+src+": not in "+dstNamespaces+" or "+srcNamespace);
+				if (srcIdx < 0) throw new LocalizedIOException("invalid_alt_ns_not_in", src, dstNamespaces, srcNamespace);
 			}
 
 			alternativesMapping[i] = srcIdx;

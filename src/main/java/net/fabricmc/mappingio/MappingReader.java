@@ -92,7 +92,7 @@ public final class MappingReader {
 	public static List<String> getNamespaces(Path file, MappingFormat format) throws IOException {
 		if (format == null) {
 			format = detectFormat(file);
-			if (format == null) throw new IOException(I18n.translate("error.invalid_mapping_format"));
+			if (format == null) throw new LocalizedIOException("invalid_mapping_format");
 		}
 
 		if (format.hasNamespaces) {
@@ -114,7 +114,7 @@ public final class MappingReader {
 			reader.mark(DETECT_HEADER_LEN);
 			format = detectFormat(reader);
 			reader.reset();
-			if (format == null) throw new IOException(I18n.translate("error.invalid_mapping_format"));
+			if (format == null) throw new LocalizedIOException("invalid_mapping_format");
 		}
 
 		if (format.hasNamespaces) {
@@ -142,7 +142,7 @@ public final class MappingReader {
 	public static void read(Path file, MappingFormat format, MappingVisitor visitor) throws IOException {
 		if (format == null) {
 			format = detectFormat(file);
-			if (format == null) throw new IOException(I18n.translate("error.invalid_mapping_format"));
+			if (format == null) throw new LocalizedIOException("invalid_mapping_format");
 		}
 
 		if (format.hasSingleFile()) {
@@ -172,7 +172,7 @@ public final class MappingReader {
 			reader.mark(DETECT_HEADER_LEN);
 			format = detectFormat(reader);
 			reader.reset();
-			if (format == null) throw new IOException(I18n.translate("error.invalid_mapping_format"));
+			if (format == null) throw new LocalizedIOException("invalid_mapping_format");
 		}
 
 		checkReaderCompatible(format);
@@ -204,7 +204,7 @@ public final class MappingReader {
 
 	private static void checkReaderCompatible(MappingFormat format) throws IOException {
 		if (!format.hasSingleFile()) {
-			throw new IOException(I18n.translate("error.cannot_read_format_using_reader", format));
+			throw new LocalizedIOException("cannot_read_format_using_reader", format);
 		}
 	}
 

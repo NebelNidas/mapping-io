@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import net.fabricmc.mappingio.LocalizedIOException;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingUtil;
@@ -98,7 +99,7 @@ public final class TsrgFileReader {
 
 					String srcName = reader.nextCol();
 					if (srcName == null || srcName.endsWith("/")) continue;
-					if (srcName.isEmpty()) throw new IOException("missing class-name-a in line "+reader.getLineNumber());
+					if (srcName.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 					if (visitor.visitClass(srcName)) {
 						readClass(reader, isTsrg2, dstNsCount, nameTmp, visitor);
@@ -120,10 +121,10 @@ public final class TsrgFileReader {
 			if (reader.hasExtraIndents()) continue;
 
 			String srcName = reader.nextCol();
-			if (srcName == null || srcName.isEmpty()) throw new IOException("missing name-a in line "+reader.getLineNumber());
+			if (srcName == null || srcName.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 			String arg = reader.nextCol();
-			if (arg == null) throw new IOException("missing desc/name-b in line "+reader.getLineNumber());
+			if (arg == null) throw new LocalizedIOException("invalid_or_missing_src_desc_or_dst_name", reader.getLineNumber());
 
 			if (arg.startsWith("(")) { // method: <nameA> <descA> <names>...
 				if (visitor.visitMethod(srcName, arg)) {
@@ -137,7 +138,7 @@ public final class TsrgFileReader {
 			} else { // tsrg2 field, may have desc
 				for (int i = 0; i < dstNsCount - 1; i++) {
 					String name = reader.nextCol();
-					if (name == null) throw new IOException("missing name columns in line "+reader.getLineNumber());
+					if (name == null) throw new LocalizedIOException("missing_columns", reader.getLineNumber());
 					nameTmp.add(name);
 				}
 
@@ -151,7 +152,7 @@ public final class TsrgFileReader {
 				} else { // arg is desc, nameTmp starts with 1st dst name: <nameA> <descA> <names>...
 					offset = 0;
 					desc = arg;
-					if (desc.isEmpty()) throw new IOException("empty field desc in line "+reader.getLineNumber());
+					if (desc.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_desc", reader.getLineNumber());
 				}
 
 				if (visitor.visitField(srcName, desc)) {
@@ -186,10 +187,10 @@ public final class TsrgFileReader {
 				// method is static
 			} else {
 				int lvIndex = reader.nextIntCol();
-				if (lvIndex < 0) throw new IOException("missing/invalid parameter lv-index in line "+reader.getLineNumber());
+				if (lvIndex < 0) throw new LocalizedIOException("invalid_or_missing", "lv-index", reader.getLineNumber());
 
 				String srcName = reader.nextCol();
-				if (srcName == null) throw new IOException("missing var-name-a column in line "+reader.getLineNumber());
+				if (srcName == null) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 				if (srcName.isEmpty()) srcName = null;
 
 				if (visitor.visitMethodArg(-1, lvIndex, srcName)) {
@@ -207,7 +208,7 @@ public final class TsrgFileReader {
 	private static void readDstNames(ColumnFileReader reader, MappedElementKind subjectKind, int dstNsOffset, int dstNsCount, MappingVisitor visitor) throws IOException {
 		for (int dstNs = dstNsOffset; dstNs < dstNsCount; dstNs++) {
 			String name = reader.nextCol();
-			if (name == null) throw new IOException("missing name columns in line "+reader.getLineNumber());
+			if (name == null) throw new LocalizedIOException("missing_columns", reader.getLineNumber());
 
 			if (!name.isEmpty()) visitor.visitDstName(subjectKind, dstNs, name);
 		}

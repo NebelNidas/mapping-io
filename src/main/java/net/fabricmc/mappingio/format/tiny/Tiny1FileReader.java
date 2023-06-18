@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import net.fabricmc.mappingio.LocalizedIOException;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingVisitor;
@@ -36,7 +37,7 @@ public final class Tiny1FileReader {
 
 	private static List<String> getNamespaces(ColumnFileReader reader) throws IOException {
 		if (!reader.nextCol("v1")) { // magic/version
-			throw new IOException("invalid/unsupported tiny file: no tiny 1 header");
+			throw new LocalizedIOException("invalid_or_missing_header");
 		}
 
 		List<String> ret = new ArrayList<>();
@@ -55,7 +56,7 @@ public final class Tiny1FileReader {
 
 	private static void read(ColumnFileReader reader, MappingVisitor visitor) throws IOException {
 		if (!reader.nextCol("v1")) { // magic/version
-			throw new IOException("invalid/unsupported tiny file: no tiny 1 header");
+			throw new LocalizedIOException("invalid_or_missing_header");
 		}
 
 		String srcNamespace = reader.nextCol();
@@ -94,7 +95,7 @@ public final class Tiny1FileReader {
 
 					if (reader.nextCol("CLASS")) { // class: CLASS <names>...
 						String srcName = reader.nextCol();
-						if (srcName == null || srcName.isEmpty()) throw new IOException("missing class-name-a in line "+reader.getLineNumber());
+						if (srcName == null || srcName.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 						if (!lastClassDstNamed || !srcName.equals(lastClass)) {
 							lastClass = srcName;
@@ -108,7 +109,7 @@ public final class Tiny1FileReader {
 						}
 					} else if ((isMethod = reader.nextCol("METHOD")) || reader.nextCol("FIELD")) { // method: METHOD cls-a desc-a <names>... or field: FIELD cls-a desc-a <names>...
 						String srcOwner = reader.nextCol();
-						if (srcOwner == null || srcOwner.isEmpty()) throw new IOException("missing class-name-a in line "+reader.getLineNumber());
+						if (srcOwner == null || srcOwner.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 						if (!srcOwner.equals(lastClass)) {
 							lastClass = srcOwner;
@@ -118,9 +119,9 @@ public final class Tiny1FileReader {
 
 						if (visitLastClass) {
 							String srcDesc = reader.nextCol();
-							if (srcDesc == null || srcDesc.isEmpty()) throw new IOException("missing desc-a in line "+reader.getLineNumber());
+							if (srcDesc == null || srcDesc.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_desc", reader.getLineNumber());
 							String srcName = reader.nextCol();
-							if (srcName == null || srcName.isEmpty()) throw new IOException("missing name-a in line "+reader.getLineNumber());
+							if (srcName == null || srcName.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 							if (isMethod && visitor.visitMethod(srcName, srcDesc)
 									|| !isMethod && visitor.visitField(srcName, srcDesc)) {
@@ -171,7 +172,7 @@ public final class Tiny1FileReader {
 	private static void readDstNames(ColumnFileReader reader, MappedElementKind subjectKind, int dstNsCount, MappingVisitor visitor) throws IOException {
 		for (int dstNs = 0; dstNs < dstNsCount; dstNs++) {
 			String name = reader.nextCol();
-			if (name == null) throw new IOException("missing name columns in line "+reader.getLineNumber());
+			if (name == null) throw new LocalizedIOException("missing_columns", reader.getLineNumber());
 
 			if (!name.isEmpty()) visitor.visitDstName(subjectKind, dstNs, name);
 		}

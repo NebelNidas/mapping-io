@@ -16,21 +16,23 @@
 
 package net.fabricmc.mappingio.format;
 
-public enum MappingFormat {
-	TINY_FILE("Tiny file", "tiny", true, true, false, false, false),
-	TINY_2_FILE("Tiny v2 file", "tiny", true, true, true, true, true),
-	ENIGMA_FILE("Enigma file", "mappings", false, true, true, true, false),
-	ENIGMA_DIR("Enigma directory", null, false, true, true, true, false),
-	MCP_DIR("MCP directory", null, false, false, true, true, false),
-	SRG_FILE("SRG file", "srg", false, false, false, false, false),
-	TSRG_FILE("TSRG file", "tsrg", false, false, false, false, false),
-	TSRG_2_FILE("TSRG2 file", "tsrg", true, false, false, true, false),
-	PROGUARD_FILE("ProGuard file", "map", false, true, false, false, false);
+import java.util.Locale;
 
-	MappingFormat(String name, String fileExt,
-			boolean hasNamespaces, boolean hasFieldDescriptors,
+import net.fabricmc.mappingio.I18n;
+
+public enum MappingFormat {
+	TINY_FILE("tiny", true, true, false, false, false),
+	TINY_2_FILE("tiny", true, true, true, true, true),
+	ENIGMA_FILE("mappings", false, true, true, true, false),
+	ENIGMA_DIR(null, false, true, true, true, false),
+	MCP_DIR(null, false, false, true, true, false),
+	SRG_FILE("srg", false, false, false, false, false),
+	TSRG_FILE("tsrg", false, false, false, false, false),
+	TSRG_2_FILE("tsrg", true, false, false, true, false),
+	PROGUARD_FILE("map", false, true, false, false, false);
+
+	MappingFormat(String fileExt, boolean hasNamespaces, boolean hasFieldDescriptors,
 			boolean supportsComments, boolean supportsArgs, boolean supportsLocals) {
-		this.name = name;
 		this.fileExt = fileExt;
 		this.hasNamespaces = hasNamespaces;
 		this.hasFieldDescriptors = hasFieldDescriptors;
@@ -43,13 +45,16 @@ public enum MappingFormat {
 		return fileExt != null;
 	}
 
+	public String getName() {
+		return I18n.translate("format." + this.name().toLowerCase(Locale.ROOT));
+	}
+
 	public String getGlobPattern() {
-		if (fileExt == null) throw new UnsupportedOperationException("not applicable to dir based format");
+		if (fileExt == null) throw new UnsupportedOperationException(I18n.translate("error.not_applicable_to_dir_based_format"));
 
 		return "*."+fileExt;
 	}
 
-	public final String name;
 	public final String fileExt;
 	public final boolean hasNamespaces;
 	public final boolean hasFieldDescriptors;

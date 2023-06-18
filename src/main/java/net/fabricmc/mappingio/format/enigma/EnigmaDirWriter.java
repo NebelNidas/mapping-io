@@ -28,6 +28,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.fabricmc.mappingio.LocalizedIOException;
 import net.fabricmc.mappingio.MappedElementKind;
 
 public final class EnigmaDirWriter extends EnigmaWriterBase {
@@ -82,7 +83,7 @@ public final class EnigmaDirWriter extends EnigmaWriterBase {
 
 				// currentClass is not an outer class of srcName (or the same)
 				Path file = dir.resolve(name + "." + EnigmaDirReader.DIR_FILE_EXT).normalize();
-				if (!file.startsWith(dir)) throw new RuntimeException("invalid name: " + name);
+				if (!file.startsWith(dir)) throw new LocalizedIOException("invalid_name", name);
 
 				if (writer != null) {
 					writer.close();

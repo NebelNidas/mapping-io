@@ -25,6 +25,7 @@ import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingUtil;
 import net.fabricmc.mappingio.MappingVisitor;
+import net.fabricmc.mappingio.LocalizedIOException;
 import net.fabricmc.mappingio.format.ColumnFileReader;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
@@ -73,7 +74,9 @@ public final class EnigmaFileReader {
 
 	private static void readClass(ColumnFileReader reader, int indent, String outerSrcClass, String outerDstClass, StringBuilder commentSb, MappingVisitor visitor) throws IOException {
 		String srcInnerName = reader.nextCol();
-		if (srcInnerName == null || srcInnerName.isEmpty()) throw new IOException("missing class-name-a in line "+reader.getLineNumber());
+		if (srcInnerName == null || srcInnerName.isEmpty()) {
+			throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
+		}
 
 		String srcName = srcInnerName;
 
@@ -119,10 +122,10 @@ public final class EnigmaFileReader {
 				if (state < 0) continue;
 
 				String srcName = reader.nextCol();
-				if (srcName == null || srcName.isEmpty()) throw new IOException("missing field-name-a in line "+reader.getLineNumber());
+				if (srcName == null || srcName.isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 
 				String dstNameOrSrcDesc = reader.nextCol();
-				if (dstNameOrSrcDesc == null || dstNameOrSrcDesc.isEmpty()) throw new IOException("missing field-desc-b in line "+reader.getLineNumber());
+				if (dstNameOrSrcDesc == null || dstNameOrSrcDesc.isEmpty()) throw new LocalizedIOException("invalid_or_missing_dst_desc", reader.getLineNumber());
 
 				String srcDesc = reader.nextCol();
 				String dstName;
@@ -186,11 +189,11 @@ public final class EnigmaFileReader {
 
 				if (reader.nextCol("ARG")) { // method parameter: ARG <lv-index> <name-b>
 					int lvIndex = reader.nextIntCol();
-					if (lvIndex < 0) throw new IOException("missing/invalid parameter lv-index in line "+reader.getLineNumber());
+					if (lvIndex < 0) throw new LocalizedIOException("invalid_or_missing", "lv-index", reader.getLineNumber());
 
 					if (visitor.visitMethodArg(-1, lvIndex, null)) {
 						String dstName = reader.nextCol();
-						if (dstName == null) throw new IOException("missing var-name-b column in line "+reader.getLineNumber());
+						if (dstName == null) throw new LocalizedIOException("invalid_or_missing_dst_name", reader.getLineNumber());
 						if (!dstName.isEmpty()) visitor.visitDstName(MappedElementKind.METHOD_ARG, 0, dstName);
 
 						readElement(reader, MappedElementKind.METHOD_ARG, indent, commentSb, visitor);

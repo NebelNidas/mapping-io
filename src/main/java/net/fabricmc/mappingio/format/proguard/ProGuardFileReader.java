@@ -27,6 +27,8 @@ import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingUtil;
 import net.fabricmc.mappingio.MappingVisitor;
+import net.fabricmc.mappingio.I18n;
+import net.fabricmc.mappingio.LocalizedIOException;
 
 public final class ProGuardFileReader {
 	public static void read(Reader reader, MappingVisitor visitor) throws IOException {
@@ -78,9 +80,9 @@ public final class ProGuardFileReader {
 
 					if (line.endsWith(":")) { // class: <deobf> -> <obf>:
 						int pos = line.indexOf(" -> ");
-						if (pos < 0) throw new IOException("invalid proguard line (invalid separator): "+line);
-						if (pos == 0) throw new IOException("invalid proguard line (empty src class): "+line);
-						if (pos + 4 + 1 >= line.length()) throw new IOException("invalid proguard line (empty dst class): "+line);
+						if (pos < 0) throw new LocalizedIOException("invalid_or_missing_separator", line);
+						if (pos == 0) throw new LocalizedIOException("invalid_or_missing_src_name", line);
+						if (pos + 4 + 1 >= line.length()) throw new LocalizedIOException("invalid_or_missing_dst_name", line);
 
 						String name = line.substring(0, pos).replace('.', '/');
 						visitClass = visitor.visitClass(name);
@@ -93,11 +95,11 @@ public final class ProGuardFileReader {
 					} else if (visitClass) { // method or field: <type> <deobf> -> <obf>
 						String[] parts = line.split(" ");
 
-						if (parts.length != 4) throw new IOException("invalid proguard line (extra columns): "+line);
-						if (parts[0].isEmpty()) throw new IOException("invalid proguard line (empty type): "+line);
-						if (parts[1].isEmpty()) throw new IOException("invalid proguard line (empty src member): "+line);
-						if (!parts[2].equals("->")) throw new IOException("invalid proguard line (invalid separator): "+line);
-						if (parts[3].isEmpty()) throw new IOException("invalid proguard line (empty dst member): "+line);
+						if (parts.length != 4) throw new LocalizedIOException("extra_columns", line);
+						if (parts[0].isEmpty()) throw new LocalizedIOException("invalid_or_missing_type", line);
+						if (parts[1].isEmpty()) throw new LocalizedIOException("invalid_or_missing_src_name", line);
+						if (!parts[2].equals("->")) throw new LocalizedIOException("invalid_or_missing_separator", line);
+						if (parts[3].isEmpty()) throw new LocalizedIOException("invalid_or_missing_dst_name", line);
 
 						if (parts[1].indexOf('(') < 0) { // field: <type> <deobf> -> <obf>
 							String name = parts[1];
@@ -149,7 +151,7 @@ public final class ProGuardFileReader {
 			if (visitor.visitEnd()) break;
 
 			if (parentReader == null) {
-				throw new IllegalStateException("repeated visitation requested without NEEDS_MULTIPLE_PASSES");
+				throw new IllegalStateException(I18n.translate("error.repeated_visitation_improperly_requested"));
 			} else {
 				parentReader.reset();
 				reader = new BufferedReader(parentReader);

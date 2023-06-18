@@ -337,7 +337,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 		if (this.srcNamespace != null) { // ns already set, try to merge
 			if (!srcNamespace.equals(this.srcNamespace)) {
 				srcNsMap = this.dstNamespaces.indexOf(srcNamespace);
-				if (srcNsMap < 0) throw new UnsupportedOperationException("can't merge with disassociated src namespace"); // srcNamespace must already be present
+				if (srcNsMap < 0) throw new UnsupportedOperationException(I18n.translate("error.cannot_merge_with_disassociated_namespace")); // srcNamespace must already be present
 			}
 
 			int newDstNamespaces = 0;
@@ -352,7 +352,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 					idx = this.dstNamespaces.indexOf(dstNs);
 
 					if (idx < 0) {
-						if (dstNs.equals(this.srcNamespace)) throw new UnsupportedOperationException("can't merge with existing src namespace in new dst namespaces");
+						if (dstNs.equals(this.srcNamespace)) throw new UnsupportedOperationException(I18n.translate("error.cannot_merge_with_existing_src_ns_in_new_dst"));
 						if (newDstNamespaces == 0) this.dstNamespaces = new ArrayList<>(this.dstNamespaces);
 
 						idx = this.dstNamespaces.size();
@@ -418,7 +418,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 
 	@Override
 	public boolean visitField(String srcName, String srcDesc) {
-		if (currentClass == null) throw new UnsupportedOperationException("Tried to visit field before owning class");
+		if (currentClass == null) throw new UnsupportedOperationException(I18n.translate("error.visited_member_before_ownership"));
 
 		currentMethod = null;
 
@@ -442,7 +442,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 
 	@Override
 	public boolean visitMethod(String srcName, String srcDesc) {
-		if (currentClass == null) throw new UnsupportedOperationException("Tried to visit method before owning class");
+		if (currentClass == null) throw new UnsupportedOperationException(I18n.translate("error.visited_member_before_ownership"));
 
 		MethodEntry method = currentClass.getMethod(srcName, srcDesc, srcNsMap);
 
@@ -516,7 +516,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 
 	@Override
 	public boolean visitMethodArg(int argPosition, int lvIndex, String srcName) {
-		if (currentMethod == null) throw new UnsupportedOperationException("Tried to visit method argument before owning method");
+		if (currentMethod == null) throw new UnsupportedOperationException(I18n.translate("error.visited_var_before_ownership"));
 
 		MethodArgEntry arg = currentMethod.getArg(argPosition, lvIndex, srcName);
 
@@ -540,7 +540,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 
 	@Override
 	public boolean visitMethodVar(int lvtRowIndex, int lvIndex, int startOpIdx, int endOpIdx, String srcName) {
-		if (currentMethod == null) throw new UnsupportedOperationException("Tried to visit method variable before owning method");
+		if (currentMethod == null) throw new UnsupportedOperationException(I18n.translate("error.visited_var_before_ownership"));
 
 		MethodVarEntry var = currentMethod.getVar(lvtRowIndex, lvIndex, startOpIdx, endOpIdx, srcName);
 
@@ -636,7 +636,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 	public void visitDstName(MappedElementKind targetKind, int namespace, String name) {
 		namespace = dstNameMap[namespace];
 
-		if (currentEntry == null) throw new UnsupportedOperationException("Tried to visit mapped name before owner");
+		if (currentEntry == null) throw new UnsupportedOperationException(I18n.translate("error.visited_mapped_name_before_owner"));
 
 		if (namespace < 0) {
 			if (name.equals(currentEntry.getSrcName())) return;
@@ -648,7 +648,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 				if (currentClass.srcName == null) {
 					currentClass.srcName = name;
 				} else {
-					throw new UnsupportedOperationException("can't change src name for "+currentEntry.getKind());
+					throw new UnsupportedOperationException(I18n.translate("error.cannot_change_src_name_for", currentEntry.getKind()));
 				}
 
 				break;
@@ -659,7 +659,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 				((MethodVarEntry) currentEntry).setSrcName(name);
 				break;
 			default:
-				throw new UnsupportedOperationException("can't change src name for "+currentEntry.getKind());
+				throw new UnsupportedOperationException(I18n.translate("error.cannot_change_src_name_for", currentEntry.getKind()));
 			}
 		} else {
 			currentEntry.setDstName(name, namespace);
@@ -686,7 +686,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 			entry = currentEntry;
 		}
 
-		if (entry == null) throw new UnsupportedOperationException("Tried to visit comment before owning target");
+		if (entry == null) throw new UnsupportedOperationException(I18n.translate("error.visited_comment_before_ownership"));
 		entry.setComment(comment);
 	}
 
@@ -1178,7 +1178,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 			if (Objects.equals(desc, srcDesc)) return;
 
 			MemberKey newKey = new MemberKey(srcName, desc);
-			if (owner.fields.containsKey(newKey)) throw new IllegalArgumentException("conflicting name+desc after changing desc to "+desc+" for "+this);
+			if (owner.fields.containsKey(newKey)) throw new IllegalArgumentException(I18n.translate("error.conflicting_name_plus_desc_after_desc_change", desc, this));
 
 			owner.fields.remove(key);
 			srcDesc = desc;
@@ -1231,7 +1231,7 @@ public final class MemoryMappingTree implements MappingTree, MappingVisitor {
 			if (Objects.equals(desc, srcDesc)) return;
 
 			MemberKey newKey = new MemberKey(srcName, desc);
-			if (owner.methods.containsKey(newKey)) throw new IllegalArgumentException("conflicting name+desc after changing desc to "+desc+" for "+this);
+			if (owner.methods.containsKey(newKey)) throw new IllegalArgumentException(I18n.translate("error.conflicting_name_plus_desc_after_desc_change", desc, this));
 
 			owner.methods.remove(key);
 			srcDesc = desc;

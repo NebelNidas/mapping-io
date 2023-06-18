@@ -21,13 +21,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import net.fabricmc.mappingio.I18n;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingVisitor;
 
 public abstract class ForwardingMappingVisitor implements MappingVisitor {
 	protected ForwardingMappingVisitor(MappingVisitor next) {
-		Objects.requireNonNull(next, "null next");
+		Objects.requireNonNull(next, I18n.translate("error.is_null", "next"));
 
 		this.next = next;
 	}

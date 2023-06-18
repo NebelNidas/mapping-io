@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import net.fabricmc.mappingio.I18n;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingVisitor;
 
@@ -28,7 +29,7 @@ public final class MappingDstNsReorder extends ForwardingMappingVisitor {
 	public MappingDstNsReorder(MappingVisitor next, List<String> newDstNs) {
 		super(next);
 
-		Objects.requireNonNull(newDstNs, "null newDstNs list");
+		Objects.requireNonNull(newDstNs, I18n.translate("error.is_null", "newDstNs"));
 
 		this.newDstNs = newDstNs;
 	}

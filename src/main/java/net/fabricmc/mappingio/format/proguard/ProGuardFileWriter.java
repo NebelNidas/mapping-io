@@ -23,6 +23,8 @@ import java.util.Objects;
 
 import org.objectweb.asm.Type;
 
+import net.fabricmc.mappingio.I18n;
+import net.fabricmc.mappingio.LocalizedIOException;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingWriter;
 
@@ -56,12 +58,12 @@ public final class ProGuardFileWriter implements MappingWriter {
 	 * @param dstNamespace the namespace index to write as the destination namespace, must be at least 0
 	 */
 	public ProGuardFileWriter(Writer writer, int dstNamespace) {
-		this.writer = Objects.requireNonNull(writer, "writer cannot be null");
+		this.writer = Objects.requireNonNull(writer, I18n.translate("error.is_null", "writer"));
 		this.dstNamespace = dstNamespace;
 		this.dstNamespaceString = null;
 
 		if (dstNamespace < 0) {
-			throw new IllegalArgumentException("Namespace must be non-negative, found " + dstNamespace);
+			throw new IllegalArgumentException(I18n.translate("error.negative_ns", dstNamespace));
 		}
 	}
 
@@ -72,8 +74,8 @@ public final class ProGuardFileWriter implements MappingWriter {
 	 * @param dstNamespace the namespace name to write as the destination namespace
 	 */
 	public ProGuardFileWriter(Writer writer, String dstNamespace) {
-		this.writer = Objects.requireNonNull(writer, "writer cannot be null");
-		this.dstNamespaceString = Objects.requireNonNull(dstNamespace, "namespace cannot be null");
+		this.writer = Objects.requireNonNull(writer, I18n.translate("error.is_null", "writer"));
+		this.dstNamespaceString = Objects.requireNonNull(dstNamespace, I18n.translate("error.is_null", "dstNamespace"));
 	}
 
 	/**
@@ -91,13 +93,9 @@ public final class ProGuardFileWriter implements MappingWriter {
 		if (dstNamespaceString != null) {
 			dstNamespace = dstNamespaces.indexOf(dstNamespaceString);
 
-			if (dstNamespace == -1) {
-				throw new RuntimeException("Invalid destination namespace '" + dstNamespaceString + "' not in [" + String.join(", ", dstNamespaces) + ']');
+			if (dstNamespace == -1 || dstNamespace >= dstNamespaces.size()) {
+				throw new LocalizedIOException("invalid_dst_ns_not_in", dstNamespaceString, dstNamespaces);
 			}
-		}
-
-		if (dstNamespace >= dstNamespaces.size()) {
-			throw new IndexOutOfBoundsException("Namespace " + dstNamespace + " doesn't exist in [" + String.join(", ", dstNamespaces) + ']');
 		}
 	}
 
@@ -221,7 +219,7 @@ public final class ProGuardFileWriter implements MappingWriter {
 				}
 
 				break;
-			default: throw new IllegalArgumentException("Unknown character in descriptor: " + descriptor.charAt(i));
+			default: throw new IllegalArgumentException(I18n.translate("error.invalid_char_in_desc", descriptor.charAt(i)));
 			}
 		}
 

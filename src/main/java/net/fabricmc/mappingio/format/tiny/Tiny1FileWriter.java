@@ -23,6 +23,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import net.fabricmc.mappingio.LocalizedIOException;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingWriter;
@@ -148,7 +149,7 @@ public final class Tiny1FileWriter implements MappingWriter {
 			write("METHOD");
 			break;
 		default:
-			throw new IllegalStateException("unexpected invocation for "+targetKind);
+			throw new LocalizedIOException("unexpected_invocation_for", targetKind);
 		}
 
 		writeTab();

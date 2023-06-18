@@ -21,6 +21,8 @@ import java.io.Writer;
 
 import org.jetbrains.annotations.ApiStatus;
 
+import net.fabricmc.mappingio.I18n;
+
 @ApiStatus.Internal
 public final class Tiny2Util {
 	public static boolean needEscape(String s) {
@@ -64,9 +66,9 @@ public final class Tiny2Util {
 			int type;
 
 			if (pos >= str.length()) {
-				throw new RuntimeException("incomplete escape sequence at the end");
+				throw new RuntimeException(I18n.translate("error.incomplete_escape_sequence"));
 			} else if ((type = escaped.indexOf(str.charAt(pos))) < 0) {
-				throw new RuntimeException("invalid escape character: \\"+str.charAt(pos));
+				throw new RuntimeException(I18n.translate("error.invalid_escape_character", "\\" + str.charAt(pos)));
 			} else {
 				ret.append(toEscape.charAt(type));
 			}

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.fabricmc.mappingio.LocalizedIOException;
 import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingUtil;
@@ -102,7 +103,7 @@ public final class MappingSourceNsSwitch extends ForwardingMappingVisitor {
 				if (relayHeaderOrMetadata) next.visitNamespaces(srcNamespace, dstNamespaces);
 			} else {
 				newSourceNs = dstNamespaces.indexOf(newSourceNsName);
-				if (newSourceNs < 0) throw new RuntimeException("invalid new source ns "+newSourceNsName+": not in "+dstNamespaces+" or "+srcNamespace);
+				if (newSourceNs < 0) throw new LocalizedIOException("invalid_new_src_ns_not_in", newSourceNsName, dstNamespaces, srcNamespace);
 
 				oldSourceNsName = srcNamespace;
 
@@ -219,7 +220,7 @@ public final class MappingSourceNsSwitch extends ForwardingMappingVisitor {
 			return;
 		}
 
-		if (namespace >= dstNames.length) throw new IllegalArgumentException("out of bounds namespace");
+		if (namespace >= dstNames.length) throw new LocalizedIOException("ns_out_of_bounds", name);
 
 		dstNames[namespace] = name;
 	}
