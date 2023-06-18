@@ -74,6 +74,7 @@ public final class EnigmaFileReader {
 
 	private static void readClass(ColumnFileReader reader, int indent, String outerSrcClass, String outerDstClass, StringBuilder commentSb, MappingVisitor visitor) throws IOException {
 		String srcInnerName = reader.nextCol();
+
 		if (srcInnerName == null || srcInnerName.isEmpty()) {
 			throw new LocalizedIOException("invalid_or_missing_src_name", reader.getLineNumber());
 		}
