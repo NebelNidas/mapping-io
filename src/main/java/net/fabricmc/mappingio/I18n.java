@@ -67,7 +67,11 @@ public class I18n {
 		try {
 			return localizedMessagesBundle.getString(key);
 		} catch (Exception e) {
-			return fallbackMessagesBundle.getString(key);
+			try {
+				return fallbackMessagesBundle.getString(key);
+			} catch (Exception e2) {
+				return key;
+			}
 		}
 	}
 
