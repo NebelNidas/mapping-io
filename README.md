@@ -45,3 +45,42 @@ dependencies {
 	implementation "net.fabricmc:mapping-io:${mappingio_version}"
 }
 ```
+
+
+## Comparison with other mapping libraries
+Legend:
+- ✔: Supported
+- ❌: Not supported
+- 🚧: Work in progress
+- 🙅: No plans
+
+
+### Format support
+| Format                 | Mapping-IO                       | SrgUtils                                        | Lorenz                        |
+| ---------------------- | -------------------------------- | ----------------------------------------------- | ----------------------------- |
+| Tiny v1                | ✔                               | ✔ (❌: incomplete namespaces, metadata)        | ❌                            |
+| Tiny v2                | ✔                               | ✔ (❌: incomplete namespaces; 🙅: variables)   | ❌                            |
+| Enigma File            | ✔ (🚧: access modifiers)        | ❌                                              | ✔ (❌: access modifiers)     |
+| Enigma Directory       | ✔ (🚧: access modifiers)        | ❌                                              | ❌                            |
+| SRG                    | ✔ (🚧: packages)                | ✔                                              | ✔                            |
+| XSRG                   | ✔ (🚧: packages)                | ✔                                              | ✔                            |
+| CSRG                   | ✔ (🚧: packages)                | ✔                                              | ✔                            |
+| TSRG                   | ✔ (🚧: packages)                | ✔                                              | ✔                            |
+| TSRG2                  | ✔ (🚧: packages, static marker) | ✔                                              | ❌                            |
+| Proguard               | ✔ (🚧: line numbers)            | ✔                                              | ✔ (❌: line numbers, writer) |
+| JAM                    | ✔                               | ❌                                              | ✔                            |
+| Recaf Simple           | ✔                               | ❌                                              | ❌                            |
+| JOBF                   | ✔ (🚧: packages)                | ❌                                              | ❌                            |
+| IntelliJ migration map | ✔ (🚧: packages)                | ❌                                              | ❌                            |
+
+
+### Features
+| Feature                                           | Mapping-IO | SrgUtils | Lorenz   |
+| ------------------------------------------------- | ---------- | -------- | -------- |
+| Multi-namespace support                           | ✔         | ❌       | ❌       |
+| Built-in adapters for common operations           | ✔         | ❌       | ❌       |
+| More memory-efficient alternative API             | ✔         | ❌       | ❌       |
+| Error recovery                                    | 🚧        | ❌       | ❌       |
+| Arbitrary metadata                                | 🚧        | ❌       | ❌       |
+| Programmatic querying of format capabilities      | 🚧        | ❌       | ❌       |
+| Validation and reporting of non-standard contents | 🚧        | ❌       | ❌       |
