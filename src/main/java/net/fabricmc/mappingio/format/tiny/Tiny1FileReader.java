@@ -68,7 +68,7 @@ public final class Tiny1FileReader {
 	}
 
 	public static void read(Reader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
-		read(new ColumnFileReader(reader,'\t', '\t'), visitor, errorCollector);
+		read(new ColumnFileReader(reader, '\t', '\t'), visitor, errorCollector);
 	}
 
 	private static void read(ColumnFileReader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
