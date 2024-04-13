@@ -79,6 +79,12 @@ public class VisitEndTest {
 	}
 
 	@Test
+	public void jamFile() throws Exception {
+		MappingFormat format = MappingFormat.JAM_FILE;
+		check(format);
+	}
+
+	@Test
 	public void csrgFile() throws Exception {
 		MappingFormat format = MappingFormat.CSRG_FILE;
 		check(format);
@@ -99,6 +105,12 @@ public class VisitEndTest {
 	@Test
 	public void proguardFile() throws Exception {
 		MappingFormat format = MappingFormat.PROGUARD_FILE;
+		check(format);
+	}
+
+	@Test
+	public void jobfFile() throws Exception {
+		MappingFormat format = MappingFormat.JOBF_FILE;
 		check(format);
 	}
 

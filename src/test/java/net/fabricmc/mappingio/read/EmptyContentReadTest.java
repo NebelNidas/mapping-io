@@ -27,7 +27,10 @@ import net.fabricmc.mappingio.format.ErrorCollector;
 import net.fabricmc.mappingio.format.ErrorCollector.Severity;
 import net.fabricmc.mappingio.format.ErrorCollector.ThrowingErrorCollector;
 import net.fabricmc.mappingio.format.enigma.EnigmaFileReader;
+import net.fabricmc.mappingio.format.jobf.JobfFileReader;
 import net.fabricmc.mappingio.format.proguard.ProGuardFileReader;
+import net.fabricmc.mappingio.format.simple.RecafSimpleFileReader;
+import net.fabricmc.mappingio.format.srg.JamFileReader;
 import net.fabricmc.mappingio.format.srg.SrgFileReader;
 import net.fabricmc.mappingio.format.srg.TsrgFileReader;
 import net.fabricmc.mappingio.format.tiny.Tiny1FileReader;
@@ -65,7 +68,22 @@ public class EmptyContentReadTest {
 	}
 
 	@Test
+	public void emptyJamFile() throws Exception {
+		JamFileReader.read(new StringReader(""), tree);
+	}
+
+	@Test
 	public void emptyTsrgFile() throws Exception {
 		TsrgFileReader.read(new StringReader(""), tree, errorCollector);
+	}
+
+	@Test
+	public void emptyRecafSimpleFile() throws Exception {
+		RecafSimpleFileReader.read(new StringReader(""), tree);
+	}
+
+	@Test
+	public void emptyJobfFile() throws Exception {
+		JobfFileReader.read(new StringReader(""), tree);
 	}
 }

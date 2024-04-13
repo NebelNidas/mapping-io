@@ -86,6 +86,13 @@ public class ValidContentReadTest {
 	}
 
 	@Test
+	public void jamFile() throws Exception {
+		MappingFormat format = MappingFormat.JAM_FILE;
+		checkDefault(format);
+		checkHoles(format);
+	}
+
+	@Test
 	public void csrgFile() throws Exception {
 		MappingFormat format = MappingFormat.CSRG_FILE;
 		checkDefault(format);
@@ -109,6 +116,20 @@ public class ValidContentReadTest {
 	@Test
 	public void proguardFile() throws Exception {
 		MappingFormat format = MappingFormat.PROGUARD_FILE;
+		checkDefault(format);
+		checkHoles(format);
+	}
+
+	@Test
+	public void recafSimpleFile() throws Exception {
+		MappingFormat format = MappingFormat.RECAF_SIMPLE_FILE;
+		checkDefault(format);
+		checkHoles(format);
+	}
+
+	@Test
+	public void jobfFile() throws Exception {
+		MappingFormat format = MappingFormat.JOBF_FILE;
 		checkDefault(format);
 		checkHoles(format);
 	}
