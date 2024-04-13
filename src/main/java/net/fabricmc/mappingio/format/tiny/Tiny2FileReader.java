@@ -41,7 +41,7 @@ public final class Tiny2FileReader {
 	}
 
 	public static List<String> getNamespaces(Reader reader) throws IOException {
-		return getNamespaces(new ColumnFileReader(reader, '\t'));
+		return getNamespaces(new ColumnFileReader(reader, '\t', '\t'));
 	}
 
 	private static List<String> getNamespaces(ColumnFileReader reader) throws IOException {
@@ -63,11 +63,11 @@ public final class Tiny2FileReader {
 
 	@Deprecated
 	public static void read(Reader reader, MappingVisitor visitor) throws IOException {
-		read(new ColumnFileReader(reader, '\t'), visitor, new ThrowingErrorCollector(Severity.ERROR));
+		read(new ColumnFileReader(reader, '\t', '\t'), visitor, new ThrowingErrorCollector(Severity.ERROR));
 	}
 
 	public static void read(Reader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
-		read(new ColumnFileReader(reader, '\t'), visitor, errorCollector);
+		read(new ColumnFileReader(reader, '\t', '\t'), visitor, errorCollector);
 	}
 
 	private static void read(ColumnFileReader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
@@ -115,7 +115,7 @@ public final class Tiny2FileReader {
 							continue;
 						}
 
-						String value = reader.nextEscapedCol(); // may be missing -> null
+						String value = reader.nextCol(true); // may be missing -> null
 
 						if (key.equals(Tiny2Util.escapedNamesProperty)) {
 							escapeNames = true;
@@ -270,7 +270,7 @@ public final class Tiny2FileReader {
 	}
 
 	private static void readComment(ColumnFileReader reader, MappedElementKind subjectKind, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
-		String comment = reader.nextEscapedCol();
+		String comment = reader.nextCol(true);
 
 		if (comment == null) {
 			errorCollector.addWarning("missing comment in line "+reader.getLineNumber());

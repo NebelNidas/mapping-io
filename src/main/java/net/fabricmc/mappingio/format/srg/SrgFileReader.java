@@ -55,11 +55,11 @@ public final class SrgFileReader {
 
 	@Deprecated
 	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		read(new ColumnFileReader(reader, ' '), sourceNs, targetNs, visitor, new ThrowingErrorCollector(Severity.ERROR));
+		read(reader, sourceNs, targetNs, visitor, new ThrowingErrorCollector(Severity.ERROR));
 	}
 
 	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
-		read(new ColumnFileReader(reader, ' '), sourceNs, targetNs, visitor, errorCollector);
+		read(new ColumnFileReader(reader, '\t', ' '), sourceNs, targetNs, visitor, errorCollector);
 	}
 
 	private static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
