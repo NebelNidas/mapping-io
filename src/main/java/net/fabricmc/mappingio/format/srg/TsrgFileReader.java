@@ -75,7 +75,7 @@ public final class TsrgFileReader {
 
 	@Deprecated
 	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		read(new ColumnFileReader(reader, '\t', ' '), sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.ERROR));
+		read(new ColumnFileReader(reader, '\t', ' '), sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
 	public static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {

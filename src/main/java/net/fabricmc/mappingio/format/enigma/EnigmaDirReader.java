@@ -57,7 +57,7 @@ public final class EnigmaDirReader {
 
 	@Deprecated
 	public static void read(Path dir, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		read(dir, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.ERROR));
+		read(dir, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
 	public static void read(Path dir, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {

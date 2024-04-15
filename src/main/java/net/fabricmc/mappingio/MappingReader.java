@@ -238,7 +238,7 @@ public final class MappingReader {
 	 */
 	@Deprecated
 	public static void read(Path path, MappingFormat format, MappingVisitor visitor) throws IOException {
-		read(path, format, visitor, new ThrowingErrorSink(Severity.ERROR));
+		read(path, format, visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
 	/**
@@ -304,7 +304,7 @@ public final class MappingReader {
 	 */
 	@Deprecated
 	public static void read(Reader reader, MappingFormat format, MappingVisitor visitor) throws IOException {
-		read(reader, format, visitor, new ThrowingErrorSink(Severity.ERROR));
+		read(reader, format, visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
 	/**

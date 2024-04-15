@@ -35,5 +35,5 @@ public final class ThrowingErrorSink implements ErrorSink {
 		}
 	}
 
-	private Severity severityToThrowAt;
+	private final Severity severityToThrowAt;
 }

@@ -64,7 +64,7 @@ public final class Tiny1FileReader {
 
 	@Deprecated
 	public static void read(Reader reader, MappingVisitor visitor) throws IOException {
-		read(reader, visitor, new ThrowingErrorSink(Severity.ERROR));
+		read(reader, visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
 	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {

@@ -63,7 +63,7 @@ public final class Tiny2FileReader {
 
 	@Deprecated
 	public static void read(Reader reader, MappingVisitor visitor) throws IOException {
-		read(new ColumnFileReader(reader, '\t', '\t'), visitor, new ThrowingErrorSink(Severity.ERROR));
+		read(new ColumnFileReader(reader, '\t', '\t'), visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
 	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {

@@ -53,7 +53,7 @@ public final class ProGuardFileReader {
 
 	@Deprecated
 	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		read(reader, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.ERROR));
+		read(reader, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
 	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
