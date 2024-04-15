@@ -161,22 +161,66 @@ public class InvalidContentReadTest {
 		MappingFormat format = MappingFormat.ENIGMA_FILE;
 		String prefix = "CLASS";
 
+		// Class
 		checkError(prefix, format);
 		checkError(prefix += " ", format);
 		checkWorks(prefix += "src", format);
 		checkWorks(prefix += "\n", format);
-		checkError(prefix += "\tMETHOD", format);
 
+		// Method
+		checkError(prefix += "\tMETHOD", format);
 		checkError(prefix + " ", format);
 		checkWarning(prefix += " src", format);
 		checkWarning(prefix + " ", format);
-		checkError(prefix += " ()V\n\t\tARG", format);
+		checkWorks(prefix += " ()V", format);
+		checkWorks(prefix += "\n", format);
 
+		// Method arg
+		checkError(prefix += "\t\tARG", format);
 		checkError(prefix += " ", format);
 		checkError(prefix + " ", format);
 		checkError(prefix + "src", format);
 		checkWorks(prefix += "0", format);
 		checkWarning(prefix += " ", format);
+	}
+
+	@Test
+	public void proguardFile() throws Exception {
+		MappingFormat format = MappingFormat.PROGUARD_FILE;
+		String prefix = "src";
+
+		// Class
+		checkError(prefix + ":", format);
+		checkError((prefix += " ") + ":", format);
+		checkError((prefix += "->") + ":", format);
+		checkWarning((prefix += " ") + ":", format);
+		checkWorks(prefix += "dst" + ":", format);
+		checkWorks(prefix += "\n", format);
+
+		// Field
+		checkWorks(prefix += "    ", format);
+		checkError(prefix += "int", format);
+		checkError(prefix += " ", format);
+		checkError(prefix += "src", format);
+		checkError(prefix += " ", format);
+		checkError(prefix += "->", format);
+		checkError(prefix += " ", format);
+		checkWorks(prefix += "dst", format);
+		checkInfo(prefix + " dst2", format);
+		checkWorks(prefix += "\n", format);
+
+		// Method
+		checkWorks(prefix += "    ", format);
+		checkError(prefix += "void", format);
+		checkError(prefix += " ", format);
+		checkError(prefix += "src", format);
+		checkError(prefix += "()", format);
+		checkError(prefix += " ", format);
+		checkError(prefix += "->", format);
+		checkError(prefix += " ", format);
+		checkWorks(prefix += "dst", format);
+		checkInfo(prefix + " dst2", format);
+		checkWorks(prefix += "\n", format);
 	}
 
 	@Test
