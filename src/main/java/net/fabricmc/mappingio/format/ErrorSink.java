@@ -21,6 +21,14 @@ import java.io.IOException;
 import net.fabricmc.mappingio.format.ParsingError.Severity;
 
 public interface ErrorSink {
+	static ErrorSink noOp() {
+		return new ErrorSink() {
+			@Override
+			public void add(Severity severity, String message) {
+			}
+		};
+	}
+
 	default void addInfo(String message) throws IOException {
 		add(Severity.INFO, message);
 	}
