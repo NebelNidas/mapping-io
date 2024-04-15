@@ -49,8 +49,8 @@ public final class SrgFileReader {
 		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor);
 	}
 
-	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorCollector);
+	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorSink);
 	}
 
 	@Deprecated
@@ -58,11 +58,11 @@ public final class SrgFileReader {
 		read(reader, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
-	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		read(new ColumnFileReader(reader, '\t', ' '), sourceNs, targetNs, visitor, errorCollector);
+	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		read(new ColumnFileReader(reader, '\t', ' '), sourceNs, targetNs, visitor, errorSink);
 	}
 
-	private static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	private static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		Set<MappingFlag> flags = visitor.getFlags();
 		MappingVisitor parentVisitor = null;
 		MappingFormat format = MappingFormat.SRG_FILE;
@@ -92,7 +92,7 @@ public final class SrgFileReader {
 						String srcName = reader.nextCol();
 
 						if (srcName == null || srcName.isEmpty()) {
-							errorCollector.addError("missing class-name-a in line "+reader.getLineNumber());
+							errorSink.addError("missing class-name-a in line "+reader.getLineNumber());
 							continue;
 						}
 
@@ -104,7 +104,7 @@ public final class SrgFileReader {
 								String dstName = reader.nextCol();
 
 								if (dstName == null || dstName.isEmpty()) {
-									errorCollector.addWarning("missing class-name-b in line "+reader.getLineNumber());
+									errorSink.addWarning("missing class-name-b in line "+reader.getLineNumber());
 									dstName = null;
 								}
 
@@ -116,14 +116,14 @@ public final class SrgFileReader {
 						String src = reader.nextCol();
 
 						if (src == null) {
-							errorCollector.addError("missing class/name a in line "+reader.getLineNumber());
+							errorSink.addError("missing class/name a in line "+reader.getLineNumber());
 							continue;
 						}
 
 						int srcSepPos = src.lastIndexOf('/');
 
 						if (srcSepPos <= 0 || srcSepPos == src.length() - 1) {
-							errorCollector.addError("invalid class/name a in line "+reader.getLineNumber());
+							errorSink.addError("invalid class/name a in line "+reader.getLineNumber());
 							continue;
 						}
 
@@ -142,7 +142,7 @@ public final class SrgFileReader {
 							srcDesc = cols[0];
 
 							if (srcDesc == null || srcDesc.isEmpty()) {
-								errorCollector.addWarning("missing desc a in line "+reader.getLineNumber());
+								errorSink.addWarning("missing desc a in line "+reader.getLineNumber());
 								srcDesc = null;
 							}
 
@@ -150,7 +150,7 @@ public final class SrgFileReader {
 							dstDesc = cols[2];
 
 							if (dstDesc == null || dstDesc.isEmpty()) {
-								errorCollector.addWarning("missing desc b in line "+reader.getLineNumber());
+								errorSink.addWarning("missing desc b in line "+reader.getLineNumber());
 								dstDesc = null;
 							}
 						} else {
@@ -163,13 +163,13 @@ public final class SrgFileReader {
 						boolean dstNameValid = true;
 
 						if (dstName == null) {
-							errorCollector.addWarning("missing class/name b in line "+reader.getLineNumber());
+							errorSink.addWarning("missing class/name b in line "+reader.getLineNumber());
 							dstNameValid = false;
 						} else {
 							dstSepPos = dstName.lastIndexOf('/');
 
 							if (dstSepPos <= 0 || dstSepPos == dstName.length() - 1) {
-								errorCollector.addWarning("invalid class/name b in line "+reader.getLineNumber());
+								errorSink.addWarning("invalid class/name b in line "+reader.getLineNumber());
 								dstNameValid = false;
 							}
 						}

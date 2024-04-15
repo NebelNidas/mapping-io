@@ -66,11 +66,11 @@ public final class Tiny2FileReader {
 		read(new ColumnFileReader(reader, '\t', '\t'), visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
-	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		read(new ColumnFileReader(reader, '\t', '\t'), visitor, errorCollector);
+	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		read(new ColumnFileReader(reader, '\t', '\t'), visitor, errorSink);
 	}
 
-	private static void read(ColumnFileReader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	private static void read(ColumnFileReader reader, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		if (!reader.nextCol("tiny") // magic
 				|| reader.nextIntCol(true) != 2 // major version
 				|| reader.nextIntCol(true) < 0) { // minor version
@@ -111,7 +111,7 @@ public final class Tiny2FileReader {
 						String key = reader.nextCol();
 
 						if (key == null) {
-							errorCollector.addError("missing property key in line "+reader.getLineNumber());
+							errorSink.addError("missing property key in line "+reader.getLineNumber());
 							continue;
 						}
 
@@ -132,12 +132,12 @@ public final class Tiny2FileReader {
 						String srcName = reader.nextCol(escapeNames);
 
 						if (srcName == null || srcName.isEmpty()) {
-							errorCollector.addError("missing class-name-a in line "+reader.getLineNumber());
+							errorSink.addError("missing class-name-a in line "+reader.getLineNumber());
 							continue;
 						}
 
 						if (visitor.visitClass(srcName)) {
-							readClass(reader, dstNsCount, escapeNames, visitor, errorCollector);
+							readClass(reader, dstNsCount, escapeNames, visitor, errorSink);
 						}
 					}
 				}
@@ -150,8 +150,8 @@ public final class Tiny2FileReader {
 		}
 	}
 
-	private static void readClass(ColumnFileReader reader, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		readDstNames(reader, MappedElementKind.CLASS, dstNsCount, escapeNames, visitor, errorCollector);
+	private static void readClass(ColumnFileReader reader, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		readDstNames(reader, MappedElementKind.CLASS, dstNsCount, escapeNames, visitor, errorSink);
 		if (!visitor.visitElementContent(MappedElementKind.CLASS)) return;
 
 		while (reader.nextLine(1)) {
@@ -159,46 +159,46 @@ public final class Tiny2FileReader {
 				String srcDesc = reader.nextCol(escapeNames);
 
 				if (srcDesc == null || srcDesc.isEmpty()) {
-					errorCollector.addError("missing field-desc-a in line "+reader.getLineNumber());
+					errorSink.addError("missing field-desc-a in line "+reader.getLineNumber());
 					continue;
 				}
 
 				String srcName = reader.nextCol(escapeNames);
 
 				if (srcName == null || srcName.isEmpty()) {
-					errorCollector.addError("missing field-name-a in line "+reader.getLineNumber());
+					errorSink.addError("missing field-name-a in line "+reader.getLineNumber());
 					continue;
 				}
 
 				if (visitor.visitField(srcName, srcDesc)) {
-					readElement(reader, MappedElementKind.FIELD, dstNsCount, escapeNames, visitor, errorCollector);
+					readElement(reader, MappedElementKind.FIELD, dstNsCount, escapeNames, visitor, errorSink);
 				}
 			} else if (reader.nextCol("m")) { // method: m <descA> <names>...
 				String srcDesc = reader.nextCol(escapeNames);
 
 				if (srcDesc == null || srcDesc.isEmpty()) {
-					errorCollector.addError("missing method-desc-a in line "+reader.getLineNumber());
+					errorSink.addError("missing method-desc-a in line "+reader.getLineNumber());
 					continue;
 				}
 
 				String srcName = reader.nextCol(escapeNames);
 
 				if (srcName == null || srcName.isEmpty()) {
-					errorCollector.addError("missing method-name-a in line "+reader.getLineNumber());
+					errorSink.addError("missing method-name-a in line "+reader.getLineNumber());
 					continue;
 				}
 
 				if (visitor.visitMethod(srcName, srcDesc)) {
-					readMethod(reader, dstNsCount, escapeNames, visitor, errorCollector);
+					readMethod(reader, dstNsCount, escapeNames, visitor, errorSink);
 				}
 			} else if (reader.nextCol("c")) { // comment: c <comment>
-				readComment(reader, MappedElementKind.CLASS, visitor, errorCollector);
+				readComment(reader, MappedElementKind.CLASS, visitor, errorSink);
 			}
 		}
 	}
 
-	private static void readMethod(ColumnFileReader reader, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		readDstNames(reader, MappedElementKind.METHOD, dstNsCount, escapeNames, visitor, errorCollector);
+	private static void readMethod(ColumnFileReader reader, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		readDstNames(reader, MappedElementKind.METHOD, dstNsCount, escapeNames, visitor, errorSink);
 		if (!visitor.visitElementContent(MappedElementKind.METHOD)) return;
 
 		while (reader.nextLine(2)) {
@@ -208,19 +208,19 @@ public final class Tiny2FileReader {
 				try {
 					lvIndex = reader.nextIntCol(false);
 				} catch (NumberFormatException e) {
-					errorCollector.addError("invalid parameter lv-index in line "+reader.getLineNumber());
+					errorSink.addError("invalid parameter lv-index in line "+reader.getLineNumber());
 					continue;
 				}
 
 				if (lvIndex < 0) {
-					errorCollector.addWarning("missing/invalid parameter lv-index in line "+reader.getLineNumber());
+					errorSink.addWarning("missing/invalid parameter lv-index in line "+reader.getLineNumber());
 					lvIndex = -1;
 				}
 
 				String srcName = reader.nextCol(escapeNames);
 
 				if (srcName == null) {
-					errorCollector.addWarning("missing var-name-a column in line "+reader.getLineNumber());
+					errorSink.addWarning("missing var-name-a column in line "+reader.getLineNumber());
 				} else if (srcName.isEmpty()) {
 					srcName = null;
 				}
@@ -228,7 +228,7 @@ public final class Tiny2FileReader {
 				if (lvIndex == -1 && srcName == null) continue;
 
 				if (visitor.visitMethodArg(-1, lvIndex, srcName)) {
-					readElement(reader, MappedElementKind.METHOD_ARG, dstNsCount, escapeNames, visitor, errorCollector);
+					readElement(reader, MappedElementKind.METHOD_ARG, dstNsCount, escapeNames, visitor, errorSink);
 				}
 			} else if (reader.nextCol("v")) { // method variable: v <lv-index> <lv-start-offset> <optional-lvt-index> <names>...
 				int lvIndex = -1;
@@ -236,12 +236,12 @@ public final class Tiny2FileReader {
 				try {
 					lvIndex = reader.nextIntCol(false);
 				} catch (NumberFormatException e) {
-					errorCollector.addError("invalid variable lv-index in line "+reader.getLineNumber());
+					errorSink.addError("invalid variable lv-index in line "+reader.getLineNumber());
 					continue;
 				}
 
 				if (lvIndex < 0) {
-					errorCollector.addWarning("missing/invalid variable lv-index in line "+reader.getLineNumber());
+					errorSink.addWarning("missing/invalid variable lv-index in line "+reader.getLineNumber());
 					lvIndex = -1;
 				}
 
@@ -250,12 +250,12 @@ public final class Tiny2FileReader {
 				try {
 					startOpIdx = reader.nextIntCol(false);
 				} catch (NumberFormatException e) {
-					errorCollector.addError("invalid variable lv-start-offset in line "+reader.getLineNumber());
+					errorSink.addError("invalid variable lv-start-offset in line "+reader.getLineNumber());
 					continue;
 				}
 
 				if (startOpIdx < 0) {
-					errorCollector.addWarning("missing/invalid variable lv-start-offset in line "+reader.getLineNumber());
+					errorSink.addWarning("missing/invalid variable lv-start-offset in line "+reader.getLineNumber());
 					startOpIdx = -1;
 				}
 
@@ -264,19 +264,19 @@ public final class Tiny2FileReader {
 				try {
 					lvtRowIndex = reader.nextIntCol(false);
 				} catch (NumberFormatException e) {
-					errorCollector.addError("invalid variable lvt-index in line "+reader.getLineNumber());
+					errorSink.addError("invalid variable lvt-index in line "+reader.getLineNumber());
 					continue;
 				}
 
 				if (lvtRowIndex < -1) {
-					errorCollector.addWarning("invalid variable lvt-index in line "+reader.getLineNumber());
+					errorSink.addWarning("invalid variable lvt-index in line "+reader.getLineNumber());
 					lvtRowIndex = -1;
 				}
 
 				String srcName = null;
 
 				if (reader.isAtEol()) {
-					errorCollector.addWarning("missing var-name columns in line "+reader.getLineNumber());
+					errorSink.addWarning("missing var-name columns in line "+reader.getLineNumber());
 				} else if ((srcName = reader.nextCol(escapeNames)).isEmpty()) {
 					srcName = null;
 				}
@@ -284,42 +284,42 @@ public final class Tiny2FileReader {
 				if (lvIndex == -1 && startOpIdx == -1 && srcName == null) continue;
 
 				if (visitor.visitMethodVar(lvtRowIndex, lvIndex, startOpIdx, -1, srcName)) {
-					readElement(reader, MappedElementKind.METHOD_VAR, dstNsCount, escapeNames, visitor, errorCollector);
+					readElement(reader, MappedElementKind.METHOD_VAR, dstNsCount, escapeNames, visitor, errorSink);
 				}
 			} else if (reader.nextCol("c")) { // comment: c <comment>
-				readComment(reader, MappedElementKind.METHOD, visitor, errorCollector);
+				readComment(reader, MappedElementKind.METHOD, visitor, errorSink);
 			}
 		}
 	}
 
-	private static void readElement(ColumnFileReader reader, MappedElementKind kind, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		readDstNames(reader, kind, dstNsCount, escapeNames, visitor, errorCollector);
+	private static void readElement(ColumnFileReader reader, MappedElementKind kind, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		readDstNames(reader, kind, dstNsCount, escapeNames, visitor, errorSink);
 		if (!visitor.visitElementContent(kind)) return;
 
 		while (reader.nextLine(kind.level + 1)) {
 			if (reader.nextCol("c")) { // comment: c <comment>
-				readComment(reader, kind, visitor, errorCollector);
+				readComment(reader, kind, visitor, errorSink);
 			}
 		}
 	}
 
-	private static void readComment(ColumnFileReader reader, MappedElementKind subjectKind, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	private static void readComment(ColumnFileReader reader, MappedElementKind subjectKind, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		String comment = reader.nextCol(true);
 
 		if (comment == null) {
-			errorCollector.addWarning("missing comment in line "+reader.getLineNumber());
+			errorSink.addWarning("missing comment in line "+reader.getLineNumber());
 			return;
 		}
 
 		visitor.visitComment(subjectKind, comment);
 	}
 
-	private static void readDstNames(ColumnFileReader reader, MappedElementKind subjectKind, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	private static void readDstNames(ColumnFileReader reader, MappedElementKind subjectKind, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		for (int dstNs = 0; dstNs < dstNsCount; dstNs++) {
 			String name = reader.nextCol(escapeNames);
 
 			if (name == null) {
-				errorCollector.addWarning("missing name columns in line "+reader.getLineNumber());
+				errorSink.addWarning("missing name columns in line "+reader.getLineNumber());
 				break;
 			}
 

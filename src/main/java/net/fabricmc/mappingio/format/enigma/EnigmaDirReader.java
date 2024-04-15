@@ -51,8 +51,8 @@ public final class EnigmaDirReader {
 		read(dir, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor);
 	}
 
-	public static void read(Path dir, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		read(dir, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorCollector);
+	public static void read(Path dir, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		read(dir, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorSink);
 	}
 
 	@Deprecated
@@ -60,7 +60,7 @@ public final class EnigmaDirReader {
 		read(dir, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
-	public static void read(Path dir, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	public static void read(Path dir, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		Set<MappingFlag> flags = visitor.getFlags();
 		MappingVisitor parentVisitor = null;
 
@@ -102,7 +102,7 @@ public final class EnigmaDirReader {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				if (file.getFileName().toString().endsWith("." + MappingFormat.ENIGMA_FILE.fileExt)) {
-					EnigmaFileReader.read(Files.newBufferedReader(file), sourceNs, targetNs, delegatingVisitor, errorCollector);
+					EnigmaFileReader.read(Files.newBufferedReader(file), sourceNs, targetNs, delegatingVisitor, errorSink);
 				}
 
 				return FileVisitResult.CONTINUE;

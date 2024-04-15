@@ -48,8 +48,8 @@ public final class EnigmaFileReader {
 		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor);
 	}
 
-	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorCollector);
+	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorSink);
 	}
 
 	@Deprecated
@@ -57,11 +57,11 @@ public final class EnigmaFileReader {
 		read(reader, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
-	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		read(new ColumnFileReader(reader, '\t', ' '), sourceNs, targetNs, visitor, errorCollector);
+	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		read(new ColumnFileReader(reader, '\t', ' '), sourceNs, targetNs, visitor, errorSink);
 	}
 
-	public static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	public static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		Set<MappingFlag> flags = visitor.getFlags();
 		MappingVisitor parentVisitor = null;
 
@@ -80,7 +80,7 @@ public final class EnigmaFileReader {
 
 			do {
 				if (reader.nextCol("CLASS")) { // class: CLASS <name-a> [<name-b>]
-					readClass(reader, 0, null, null, commentSb, finalVisitor, errorCollector);
+					readClass(reader, 0, null, null, commentSb, finalVisitor, errorSink);
 				}
 			} while (reader.nextLine(0));
 		}
@@ -96,11 +96,11 @@ public final class EnigmaFileReader {
 		}
 	}
 
-	private static void readClass(ColumnFileReader reader, int indent, String outerSrcClass, String outerDstClass, StringBuilder commentSb, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	private static void readClass(ColumnFileReader reader, int indent, String outerSrcClass, String outerDstClass, StringBuilder commentSb, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		String srcInnerName = reader.nextCol();
 
 		if (srcInnerName == null || srcInnerName.isEmpty()) {
-			errorCollector.addError("missing class-name-a in line "+reader.getLineNumber());
+			errorSink.addError("missing class-name-a in line "+reader.getLineNumber());
 			return;
 		}
 
@@ -122,10 +122,10 @@ public final class EnigmaFileReader {
 			dstName = String.format("%s$%s", outerDstClass, dstInnerName);
 		}
 
-		readClassBody(reader, indent, srcName, dstName, commentSb, visitor, errorCollector);
+		readClassBody(reader, indent, srcName, dstName, commentSb, visitor, errorSink);
 	}
 
-	private static void readClassBody(ColumnFileReader reader, int indent, String srcClass, String dstClass, StringBuilder commentSb, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	private static void readClassBody(ColumnFileReader reader, int indent, String srcClass, String dstClass, StringBuilder commentSb, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		boolean visited = false;
 		int state = 0; // 0=invalid 1=visit -1=skip
 
@@ -138,7 +138,7 @@ public final class EnigmaFileReader {
 					visited = true;
 				}
 
-				readClass(reader, indent + 1, srcClass, dstClass, commentSb, visitor, errorCollector);
+				readClass(reader, indent + 1, srcClass, dstClass, commentSb, visitor, errorSink);
 				state = 0;
 			} else if (reader.nextCol("COMMENT")) { // comment: COMMENT <comment>
 				readComment(reader, commentSb);
@@ -150,7 +150,7 @@ public final class EnigmaFileReader {
 				String srcName = reader.nextCol();
 
 				if (srcName == null || srcName.isEmpty()) {
-					errorCollector.addError("missing member-name-a in line "+reader.getLineNumber());
+					errorSink.addError("missing member-name-a in line "+reader.getLineNumber());
 					continue;
 				}
 
@@ -158,7 +158,7 @@ public final class EnigmaFileReader {
 				String srcDesc = reader.nextCol();
 
 				if (dstNameOrSrcDesc == null || dstNameOrSrcDesc.isEmpty()) {
-					errorCollector.addWarning("missing member-name-b/member-desc-a in line "+reader.getLineNumber());
+					errorSink.addWarning("missing member-name-b/member-desc-a in line "+reader.getLineNumber());
 					dstNameOrSrcDesc = null;
 					srcDesc = null; // just to be sure
 				}
@@ -174,7 +174,7 @@ public final class EnigmaFileReader {
 
 				if (isMethod && visitor.visitMethod(srcName, srcDesc)) {
 					if (dstName != null && !dstName.isEmpty()) visitor.visitDstName(MappedElementKind.METHOD, 0, dstName);
-					readMethod(reader, indent, commentSb, visitor, errorCollector);
+					readMethod(reader, indent, commentSb, visitor, errorSink);
 				} else if (!isMethod && visitor.visitField(srcName, srcDesc)) {
 					if (dstName != null && !dstName.isEmpty()) visitor.visitDstName(MappedElementKind.FIELD, 0, dstName);
 					readElement(reader, MappedElementKind.FIELD, indent, commentSb, visitor);
@@ -213,7 +213,7 @@ public final class EnigmaFileReader {
 		return state;
 	}
 
-	private static void readMethod(ColumnFileReader reader, int indent, StringBuilder commentSb, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	private static void readMethod(ColumnFileReader reader, int indent, StringBuilder commentSb, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		if (!visitor.visitElementContent(MappedElementKind.METHOD)) return;
 
 		while (reader.nextLine(indent + 2)) {
@@ -232,7 +232,7 @@ public final class EnigmaFileReader {
 					}
 
 					if (lvIndex < 0) {
-						errorCollector.addError("missing/invalid parameter lv-index in line "+reader.getLineNumber());
+						errorSink.addError("missing/invalid parameter lv-index in line "+reader.getLineNumber());
 						return;
 					}
 
@@ -241,7 +241,7 @@ public final class EnigmaFileReader {
 
 						if (dstName != null) {
 							if (dstName.isEmpty()) {
-								errorCollector.addWarning("missing var-name-b in line "+reader.getLineNumber());
+								errorSink.addWarning("missing var-name-b in line "+reader.getLineNumber());
 							} else {
 								visitor.visitDstName(MappedElementKind.METHOD_ARG, 0, dstName);
 							}

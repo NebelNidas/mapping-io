@@ -33,7 +33,7 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.fabricmc.mappingio.tree.VisitableMappingTree;
 
 public class ValidContentReadTest {
-	private static final ErrorSink errorCollector = new ThrowingErrorSink(Severity.INFO);
+	private static final ErrorSink errorSink = new ThrowingErrorSink(Severity.INFO);
 	private static MappingTree testTree;
 	private static MappingTree testTreeWithHoles;
 
@@ -136,7 +136,7 @@ public class ValidContentReadTest {
 
 	private VisitableMappingTree checkDefault(MappingFormat format) throws Exception {
 		VisitableMappingTree tree = new MemoryMappingTree();
-		MappingReader.read(TestHelper.MappingDirs.VALID.resolve(TestHelper.getFileName(format)), format, tree, errorCollector);
+		MappingReader.read(TestHelper.MappingDirs.VALID.resolve(TestHelper.getFileName(format)), format, tree, errorSink);
 
 		assertSubset(tree, format, testTree, null);
 		assertSubset(testTree, null, tree, format);
@@ -146,7 +146,7 @@ public class ValidContentReadTest {
 
 	private VisitableMappingTree checkHoles(MappingFormat format) throws Exception {
 		VisitableMappingTree tree = new MemoryMappingTree();
-		MappingReader.read(TestHelper.MappingDirs.VALID_WITH_HOLES.resolve(TestHelper.getFileName(format)), format, tree, errorCollector);
+		MappingReader.read(TestHelper.MappingDirs.VALID_WITH_HOLES.resolve(TestHelper.getFileName(format)), format, tree, errorSink);
 
 		assertSubset(tree, format, testTreeWithHoles, null);
 		assertSubset(testTreeWithHoles, null, tree, format);

@@ -47,8 +47,8 @@ public final class ProGuardFileReader {
 		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor);
 	}
 
-	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorCollector);
+	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorSink);
 	}
 
 	@Deprecated
@@ -56,13 +56,13 @@ public final class ProGuardFileReader {
 		read(reader, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.WARNING));
 	}
 
-	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader);
 
-		read(br, sourceNs, targetNs, visitor, errorCollector);
+		read(br, sourceNs, targetNs, visitor, errorSink);
 	}
 
-	private static void read(BufferedReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	private static void read(BufferedReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		CharArrayReader parentReader = null;
 
 		if (visitor.getFlags().contains(MappingFlag.NEEDS_MULTIPLE_PASSES)) {
@@ -104,15 +104,15 @@ public final class ProGuardFileReader {
 						boolean hasDstName = true;
 
 						if (pos < 0) {
-							errorCollector.addError("invalid proguard line (invalid separator): "+line);
+							errorSink.addError("invalid proguard line (invalid separator): "+line);
 							visitClass = false;
 							continue;
 						} else if (pos == 0) {
-							errorCollector.addError("invalid proguard line (empty src class): "+line);
+							errorSink.addError("invalid proguard line (empty src class): "+line);
 							visitClass = false;
 							continue;
 						} else if (pos + 4 + 1 >= line.length()) {
-							errorCollector.addWarning("invalid proguard line (empty dst class): "+line);
+							errorSink.addWarning("invalid proguard line (empty dst class): "+line);
 							hasDstName = false;
 						}
 
@@ -131,25 +131,25 @@ public final class ProGuardFileReader {
 						String[] parts = line.split(" ");
 
 						if (parts.length < 4) {
-							errorCollector.addError("invalid proguard line (missing columns): "+line);
+							errorSink.addError("invalid proguard line (missing columns): "+line);
 							continue;
 						} else if (parts.length > 4) {
-							errorCollector.addInfo("invalid proguard line: expected eol, found content: "+parts[4]);
+							errorSink.addInfo("invalid proguard line: expected eol, found content: "+parts[4]);
 						}
 
-						if (parts[0].isEmpty()) errorCollector.addWarning("invalid proguard line (empty type): "+line);
+						if (parts[0].isEmpty()) errorSink.addWarning("invalid proguard line (empty type): "+line);
 
 						if (parts[1].isEmpty()) {
-							errorCollector.addError("invalid proguard line (empty src member): "+line);
+							errorSink.addError("invalid proguard line (empty src member): "+line);
 							continue;
 						}
 
 						if (!parts[2].equals("->")) {
-							errorCollector.addError("invalid proguard line (invalid separator): "+line);
+							errorSink.addError("invalid proguard line (invalid separator): "+line);
 							continue;
 						}
 
-						if (parts[3].isEmpty()) errorCollector.addWarning("invalid proguard line (empty dst member): "+line);
+						if (parts[3].isEmpty()) errorSink.addWarning("invalid proguard line (empty dst member): "+line);
 
 						if (parts[1].indexOf('(') < 0) { // field: <type> <deobf> -> <obf>
 							String name = parts[1];

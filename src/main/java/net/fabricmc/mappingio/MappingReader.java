@@ -221,11 +221,11 @@ public final class MappingReader {
 	 *
 	 * @param path The path to read from. Can be a file or a directory.
 	 * @param visitor The receiving visitor.
-	 * @param errorCollector The error collector instance to log errors to.
+	 * @param errorSink The error sink to log errors to.
 	 * @throws IOException If the format can't be detected or reading fails.
 	 */
-	public static void read(Path path, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		read(path, null, visitor, errorCollector);
+	public static void read(Path path, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		read(path, null, visitor, errorSink);
 	}
 
 	/**
@@ -249,7 +249,7 @@ public final class MappingReader {
 	 * @param visitor The receiving visitor.
 	 * @throws IOException If reading fails.
 	 */
-	public static void read(Path path, MappingFormat format, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	public static void read(Path path, MappingFormat format, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		if (format == null) {
 			format = detectFormat(path);
 			if (format == null) throw new IOException("invalid/unsupported mapping format");
@@ -257,12 +257,12 @@ public final class MappingReader {
 
 		if (format.hasSingleFile()) {
 			try (Reader reader = Files.newBufferedReader(path)) {
-				read(reader, format, visitor, errorCollector);
+				read(reader, format, visitor, errorSink);
 			}
 		} else {
 			switch (format) {
 			case ENIGMA_DIR:
-				EnigmaDirReader.read(path, visitor, errorCollector);
+				EnigmaDirReader.read(path, visitor, errorSink);
 				break;
 			default:
 				throw new IllegalStateException();
@@ -287,11 +287,11 @@ public final class MappingReader {
 	 *
 	 * @param reader The reader to read from.
 	 * @param visitor The receiving visitor.
-	 * @param errorCollector The error collector instance to log errors to.
+	 * @param errorSink The error sink to log errors to.
 	 * @throws IOException If the format can't be detected or reading fails.
 	 */
-	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
-		read(reader, null, visitor, errorCollector);
+	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
+		read(reader, null, visitor, errorSink);
 	}
 
 	/**
@@ -313,10 +313,10 @@ public final class MappingReader {
 	 * @param reader The reader to read from.
 	 * @param format The format to use. Has to match the reader's content's format.
 	 * @param visitor The receiving visitor.
-	 * @param errorCollector The error collector instance to log errors to.
+	 * @param errorSink The error sink to log errors to.
 	 * @throws IOException If reading fails.
 	 */
-	public static void read(Reader reader, MappingFormat format, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
+	public static void read(Reader reader, MappingFormat format, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		if (format == null) {
 			if (!reader.markSupported()) reader = new BufferedReader(reader);
 			reader.mark(DETECT_HEADER_LEN);
@@ -329,17 +329,17 @@ public final class MappingReader {
 
 		switch (format) {
 		case TINY_FILE:
-			Tiny1FileReader.read(reader, visitor, errorCollector);
+			Tiny1FileReader.read(reader, visitor, errorSink);
 			break;
 		case TINY_2_FILE:
-			Tiny2FileReader.read(reader, visitor, errorCollector);
+			Tiny2FileReader.read(reader, visitor, errorSink);
 			break;
 		case ENIGMA_FILE:
-			EnigmaFileReader.read(reader, visitor, errorCollector);
+			EnigmaFileReader.read(reader, visitor, errorSink);
 			break;
 		case SRG_FILE:
 		case XSRG_FILE:
-			SrgFileReader.read(reader, visitor, errorCollector);
+			SrgFileReader.read(reader, visitor, errorSink);
 			break;
 		case JAM_FILE:
 			JamFileReader.read(reader, visitor);
@@ -347,10 +347,10 @@ public final class MappingReader {
 		case CSRG_FILE:
 		case TSRG_FILE:
 		case TSRG_2_FILE:
-			TsrgFileReader.read(reader, visitor, errorCollector);
+			TsrgFileReader.read(reader, visitor, errorSink);
 			break;
 		case PROGUARD_FILE:
-			ProGuardFileReader.read(reader, visitor, errorCollector);
+			ProGuardFileReader.read(reader, visitor, errorSink);
 			break;
 		case RECAF_SIMPLE_FILE:
 			RecafSimpleFileReader.read(reader, visitor);

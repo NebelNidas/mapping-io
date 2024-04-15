@@ -40,31 +40,31 @@ import net.fabricmc.mappingio.tree.VisitableMappingTree;
 
 public class EmptyContentReadTest {
 	private static final VisitableMappingTree tree = new MemoryMappingTree();
-	private static final ErrorSink errorCollector = new ThrowingErrorSink(Severity.INFO);
+	private static final ErrorSink errorSink = new ThrowingErrorSink(Severity.INFO);
 
 	@Test
 	public void emptyEnigmaFile() throws Exception {
-		EnigmaFileReader.read(new StringReader(""), tree, errorCollector);
+		EnigmaFileReader.read(new StringReader(""), tree, errorSink);
 	}
 
 	@Test
 	public void emptyTinyFile() throws Exception {
-		assertThrows(IOException.class, () -> Tiny1FileReader.read(new StringReader(""), tree, errorCollector));
+		assertThrows(IOException.class, () -> Tiny1FileReader.read(new StringReader(""), tree, errorSink));
 	}
 
 	@Test
 	public void emptyTinyV2File() throws Exception {
-		assertThrows(IOException.class, () -> Tiny2FileReader.read(new StringReader(""), tree, errorCollector));
+		assertThrows(IOException.class, () -> Tiny2FileReader.read(new StringReader(""), tree, errorSink));
 	}
 
 	@Test
 	public void emptyProguardFile() throws Exception {
-		ProGuardFileReader.read(new StringReader(""), tree, errorCollector);
+		ProGuardFileReader.read(new StringReader(""), tree, errorSink);
 	}
 
 	@Test
 	public void emptySrgFile() throws Exception {
-		SrgFileReader.read(new StringReader(""), tree, errorCollector);
+		SrgFileReader.read(new StringReader(""), tree, errorSink);
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class EmptyContentReadTest {
 
 	@Test
 	public void emptyTsrgFile() throws Exception {
-		TsrgFileReader.read(new StringReader(""), tree, errorCollector);
+		TsrgFileReader.read(new StringReader(""), tree, errorSink);
 	}
 
 	@Test
