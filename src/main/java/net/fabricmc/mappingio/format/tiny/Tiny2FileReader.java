@@ -46,8 +46,8 @@ public final class Tiny2FileReader {
 
 	private static List<String> getNamespaces(ColumnFileReader reader) throws IOException {
 		if (!reader.nextCol("tiny") // magic
-				|| reader.nextIntCol() != 2 // major version
-				|| reader.nextIntCol() < 0) { // minor version
+				|| reader.nextIntCol(true) != 2 // major version
+				|| reader.nextIntCol(true) < 0) { // minor version
 			throw new IOException("invalid/unsupported tiny file: no tiny 2 header");
 		}
 
@@ -72,8 +72,8 @@ public final class Tiny2FileReader {
 
 	private static void read(ColumnFileReader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
 		if (!reader.nextCol("tiny") // magic
-				|| reader.nextIntCol() != 2 // major version
-				|| reader.nextIntCol() < 0) { // minor version
+				|| reader.nextIntCol(true) != 2 // major version
+				|| reader.nextIntCol(true) < 0) { // minor version
 			throw new IOException("invalid/unsupported tiny file: no tiny 2 header");
 		}
 
@@ -203,7 +203,14 @@ public final class Tiny2FileReader {
 
 		while (reader.nextLine(2)) {
 			if (reader.nextCol("p")) { // method parameter: p <lv-index> <names>...
-				int lvIndex = reader.nextIntCol();
+				int lvIndex = -1;
+
+				try {
+					lvIndex = reader.nextIntCol(false);
+				} catch (NumberFormatException e) {
+					errorCollector.addError("invalid parameter lv-index in line "+reader.getLineNumber());
+					continue;
+				}
 
 				if (lvIndex < 0) {
 					errorCollector.addWarning("missing/invalid parameter lv-index in line "+reader.getLineNumber());
@@ -224,26 +231,53 @@ public final class Tiny2FileReader {
 					readElement(reader, MappedElementKind.METHOD_ARG, dstNsCount, escapeNames, visitor, errorCollector);
 				}
 			} else if (reader.nextCol("v")) { // method variable: v <lv-index> <lv-start-offset> <optional-lvt-index> <names>...
-				int lvIndex = reader.nextIntCol();
+				int lvIndex = -1;
+
+				try {
+					lvIndex = reader.nextIntCol(false);
+				} catch (NumberFormatException e) {
+					errorCollector.addError("invalid variable lv-index in line "+reader.getLineNumber());
+					continue;
+				}
 
 				if (lvIndex < 0) {
 					errorCollector.addWarning("missing/invalid variable lv-index in line "+reader.getLineNumber());
 					lvIndex = -1;
 				}
 
-				int startOpIdx = reader.nextIntCol();
+				int startOpIdx = -1;
+
+				try {
+					startOpIdx = reader.nextIntCol(false);
+				} catch (NumberFormatException e) {
+					errorCollector.addError("invalid variable lv-start-offset in line "+reader.getLineNumber());
+					continue;
+				}
 
 				if (startOpIdx < 0) {
 					errorCollector.addWarning("missing/invalid variable lv-start-offset in line "+reader.getLineNumber());
 					startOpIdx = -1;
 				}
 
-				int lvtRowIndex = reader.nextIntCol();
-				String srcName = reader.nextCol(escapeNames);
+				int lvtRowIndex = -1;
 
-				if (srcName == null) {
-					errorCollector.addWarning("missing var-name-a column in line "+reader.getLineNumber());
-				} else if (srcName.isEmpty()) {
+				try {
+					lvtRowIndex = reader.nextIntCol(false);
+				} catch (NumberFormatException e) {
+					errorCollector.addError("invalid variable lvt-index in line "+reader.getLineNumber());
+					continue;
+				}
+
+				if (lvtRowIndex < -1) {
+					errorCollector.addWarning("invalid variable lvt-index in line "+reader.getLineNumber());
+					lvtRowIndex = -1;
+				}
+
+				String srcName = null;
+
+				if (reader.isAtEol()) {
+					errorCollector.addWarning("missing var-name columns in line "+reader.getLineNumber());
+				} else if ((srcName = reader.nextCol(escapeNames)).isEmpty()) {
 					srcName = null;
 				}
 

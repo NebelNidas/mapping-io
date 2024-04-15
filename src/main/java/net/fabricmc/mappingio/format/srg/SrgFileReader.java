@@ -105,6 +105,7 @@ public final class SrgFileReader {
 
 								if (dstName == null || dstName.isEmpty()) {
 									errorCollector.addWarning("missing class-name-b in line "+reader.getLineNumber());
+									dstName = null;
 								}
 
 								visitor.visitDstName(MappedElementKind.CLASS, 0, dstName);

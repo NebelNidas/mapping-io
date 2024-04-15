@@ -155,13 +155,14 @@ public final class EnigmaFileReader {
 				}
 
 				String dstNameOrSrcDesc = reader.nextCol();
+				String srcDesc = reader.nextCol();
 
 				if (dstNameOrSrcDesc == null || dstNameOrSrcDesc.isEmpty()) {
 					errorCollector.addWarning("missing member-name-b/member-desc-a in line "+reader.getLineNumber());
 					dstNameOrSrcDesc = null;
+					srcDesc = null; // just to be sure
 				}
 
-				String srcDesc = reader.nextCol();
 				String dstName;
 
 				if (srcDesc == null) {
@@ -222,7 +223,13 @@ public final class EnigmaFileReader {
 				submitComment(MappedElementKind.METHOD, commentSb, visitor);
 
 				if (reader.nextCol("ARG")) { // method parameter: ARG <lv-index> <name-b>
-					int lvIndex = reader.nextIntCol();
+					int lvIndex = -1;
+
+					try {
+						lvIndex = reader.nextIntCol(false);
+					} catch (NumberFormatException e) {
+						// lvIndex remains -1, handled below
+					}
 
 					if (lvIndex < 0) {
 						errorCollector.addError("missing/invalid parameter lv-index in line "+reader.getLineNumber());
@@ -231,7 +238,14 @@ public final class EnigmaFileReader {
 
 					if (visitor.visitMethodArg(-1, lvIndex, null)) {
 						String dstName = reader.nextCol();
-						if (dstName != null && !dstName.isEmpty()) visitor.visitDstName(MappedElementKind.METHOD_ARG, 0, dstName);
+
+						if (dstName != null) {
+							if (dstName.isEmpty()) {
+								errorCollector.addWarning("missing var-name-b in line "+reader.getLineNumber());
+							} else {
+								visitor.visitDstName(MappedElementKind.METHOD_ARG, 0, dstName);
+							}
+						}
 
 						readElement(reader, MappedElementKind.METHOD_ARG, indent, commentSb, visitor);
 					}

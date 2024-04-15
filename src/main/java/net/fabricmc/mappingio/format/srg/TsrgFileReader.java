@@ -305,7 +305,13 @@ public final class TsrgFileReader {
 			if (reader.nextCol("static")) {
 				// method is static
 			} else {
-				int lvIndex = reader.nextIntCol();
+				int lvIndex = -1;
+
+				try {
+					lvIndex = reader.nextIntCol(false);
+				} catch (NumberFormatException e) {
+					// lvIndex remains -1, handled below
+				}
 
 				if (lvIndex < 0) {
 					errorCollector.addWarning("missing/invalid parameter lv-index in line "+reader.getLineNumber());
