@@ -28,10 +28,10 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.fabricmc.mappingio.format.ErrorCollector;
-import net.fabricmc.mappingio.format.ErrorCollector.Severity;
-import net.fabricmc.mappingio.format.ErrorCollector.ThrowingErrorCollector;
+import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.format.ThrowingErrorSink;
+import net.fabricmc.mappingio.format.ParsingError.Severity;
 import net.fabricmc.mappingio.format.enigma.EnigmaDirReader;
 import net.fabricmc.mappingio.format.enigma.EnigmaFileReader;
 import net.fabricmc.mappingio.format.jobf.JobfFileReader;
@@ -224,7 +224,7 @@ public final class MappingReader {
 	 * @param errorCollector The error collector instance to log errors to.
 	 * @throws IOException If the format can't be detected or reading fails.
 	 */
-	public static void read(Path path, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Path path, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		read(path, null, visitor, errorCollector);
 	}
 
@@ -238,7 +238,7 @@ public final class MappingReader {
 	 */
 	@Deprecated
 	public static void read(Path path, MappingFormat format, MappingVisitor visitor) throws IOException {
-		read(path, format, visitor, new ThrowingErrorCollector(Severity.ERROR));
+		read(path, format, visitor, new ThrowingErrorSink(Severity.ERROR));
 	}
 
 	/**
@@ -249,7 +249,7 @@ public final class MappingReader {
 	 * @param visitor The receiving visitor.
 	 * @throws IOException If reading fails.
 	 */
-	public static void read(Path path, MappingFormat format, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Path path, MappingFormat format, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		if (format == null) {
 			format = detectFormat(path);
 			if (format == null) throw new IOException("invalid/unsupported mapping format");
@@ -290,7 +290,7 @@ public final class MappingReader {
 	 * @param errorCollector The error collector instance to log errors to.
 	 * @throws IOException If the format can't be detected or reading fails.
 	 */
-	public static void read(Reader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		read(reader, null, visitor, errorCollector);
 	}
 
@@ -304,7 +304,7 @@ public final class MappingReader {
 	 */
 	@Deprecated
 	public static void read(Reader reader, MappingFormat format, MappingVisitor visitor) throws IOException {
-		read(reader, format, visitor, new ThrowingErrorCollector(Severity.ERROR));
+		read(reader, format, visitor, new ThrowingErrorSink(Severity.ERROR));
 	}
 
 	/**
@@ -316,7 +316,7 @@ public final class MappingReader {
 	 * @param errorCollector The error collector instance to log errors to.
 	 * @throws IOException If reading fails.
 	 */
-	public static void read(Reader reader, MappingFormat format, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Reader reader, MappingFormat format, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		if (format == null) {
 			if (!reader.markSupported()) reader = new BufferedReader(reader);
 			reader.mark(DETECT_HEADER_LEN);

@@ -27,10 +27,10 @@ import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingUtil;
 import net.fabricmc.mappingio.MappingVisitor;
-import net.fabricmc.mappingio.format.ErrorCollector;
-import net.fabricmc.mappingio.format.ErrorCollector.Severity;
-import net.fabricmc.mappingio.format.ErrorCollector.ThrowingErrorCollector;
+import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.format.ThrowingErrorSink;
+import net.fabricmc.mappingio.format.ParsingError.Severity;
 
 /**
  * {@linkplain MappingFormat#PROGUARD_FILE ProGuard file} reader.
@@ -47,22 +47,22 @@ public final class ProGuardFileReader {
 		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor);
 	}
 
-	public static void read(Reader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorCollector);
 	}
 
 	@Deprecated
 	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		read(reader, sourceNs, targetNs, visitor, new ThrowingErrorCollector(Severity.ERROR));
+		read(reader, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.ERROR));
 	}
 
-	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader);
 
 		read(br, sourceNs, targetNs, visitor, errorCollector);
 	}
 
-	private static void read(BufferedReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void read(BufferedReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		CharArrayReader parentReader = null;
 
 		if (visitor.getFlags().contains(MappingFlag.NEEDS_MULTIPLE_PASSES)) {

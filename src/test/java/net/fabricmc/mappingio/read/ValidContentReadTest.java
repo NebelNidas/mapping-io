@@ -24,16 +24,16 @@ import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.SubsetAssertingVisitor;
 import net.fabricmc.mappingio.TestHelper;
 import net.fabricmc.mappingio.adapter.FlatAsRegularMappingVisitor;
-import net.fabricmc.mappingio.format.ErrorCollector;
-import net.fabricmc.mappingio.format.ErrorCollector.Severity;
-import net.fabricmc.mappingio.format.ErrorCollector.ThrowingErrorCollector;
+import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.format.ThrowingErrorSink;
+import net.fabricmc.mappingio.format.ParsingError.Severity;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import net.fabricmc.mappingio.tree.VisitableMappingTree;
 
 public class ValidContentReadTest {
-	private static final ErrorCollector errorCollector = new ThrowingErrorCollector(Severity.INFO);
+	private static final ErrorSink errorCollector = new ThrowingErrorSink(Severity.INFO);
 	private static MappingTree testTree;
 	private static MappingTree testTreeWithHoles;
 

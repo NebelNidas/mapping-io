@@ -26,10 +26,10 @@ import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingUtil;
 import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.format.ColumnFileReader;
-import net.fabricmc.mappingio.format.ErrorCollector;
-import net.fabricmc.mappingio.format.ErrorCollector.Severity;
-import net.fabricmc.mappingio.format.ErrorCollector.ThrowingErrorCollector;
+import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.format.ThrowingErrorSink;
+import net.fabricmc.mappingio.format.ParsingError.Severity;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
@@ -48,20 +48,20 @@ public final class EnigmaFileReader {
 		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor);
 	}
 
-	public static void read(Reader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorCollector);
 	}
 
 	@Deprecated
 	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		read(reader, sourceNs, targetNs, visitor, new ThrowingErrorCollector(Severity.ERROR));
+		read(reader, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.ERROR));
 	}
 
-	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		read(new ColumnFileReader(reader, '\t', ' '), sourceNs, targetNs, visitor, errorCollector);
 	}
 
-	public static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		Set<MappingFlag> flags = visitor.getFlags();
 		MappingVisitor parentVisitor = null;
 
@@ -96,7 +96,7 @@ public final class EnigmaFileReader {
 		}
 	}
 
-	private static void readClass(ColumnFileReader reader, int indent, String outerSrcClass, String outerDstClass, StringBuilder commentSb, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readClass(ColumnFileReader reader, int indent, String outerSrcClass, String outerDstClass, StringBuilder commentSb, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		String srcInnerName = reader.nextCol();
 
 		if (srcInnerName == null || srcInnerName.isEmpty()) {
@@ -125,7 +125,7 @@ public final class EnigmaFileReader {
 		readClassBody(reader, indent, srcName, dstName, commentSb, visitor, errorCollector);
 	}
 
-	private static void readClassBody(ColumnFileReader reader, int indent, String srcClass, String dstClass, StringBuilder commentSb, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readClassBody(ColumnFileReader reader, int indent, String srcClass, String dstClass, StringBuilder commentSb, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		boolean visited = false;
 		int state = 0; // 0=invalid 1=visit -1=skip
 
@@ -213,7 +213,7 @@ public final class EnigmaFileReader {
 		return state;
 	}
 
-	private static void readMethod(ColumnFileReader reader, int indent, StringBuilder commentSb, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readMethod(ColumnFileReader reader, int indent, StringBuilder commentSb, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		if (!visitor.visitElementContent(MappedElementKind.METHOD)) return;
 
 		while (reader.nextLine(indent + 2)) {

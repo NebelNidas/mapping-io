@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 FabricMC
+ * Copyright (c) 2023 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,21 @@
 package net.fabricmc.mappingio.format;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import net.fabricmc.mappingio.format.ParsingError.Severity;
 
-public interface ErrorCollector extends ErrorSink {
-	static ErrorCollector create() {
-		return new ErrorCollector() {
-			@Override
-			public void add(Severity severity, String message) throws IOException {
-				errors.add(ParsingError.create(severity, message));
-			}
-
-			@Override
-			public List<ParsingError> getErrors() {
-				return errors;
-			}
-
-			private final List<ParsingError> errors = new ArrayList<>();
-		};
+public interface ErrorSink {
+	default void addInfo(String message) throws IOException {
+		add(Severity.INFO, message);
 	}
 
-	List<ParsingError> getErrors();
+	default void addWarning(String message) throws IOException {
+		add(Severity.WARNING, message);
+	}
+
+	default void addError(String message) throws IOException {
+		add(Severity.ERROR, message);
+	}
+
+	void add(Severity severity, String message) throws IOException;
 }

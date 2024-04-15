@@ -26,10 +26,10 @@ import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.format.ColumnFileReader;
-import net.fabricmc.mappingio.format.ErrorCollector;
-import net.fabricmc.mappingio.format.ErrorCollector.Severity;
-import net.fabricmc.mappingio.format.ErrorCollector.ThrowingErrorCollector;
+import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.format.ThrowingErrorSink;
+import net.fabricmc.mappingio.format.ParsingError.Severity;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
@@ -64,14 +64,14 @@ public final class Tiny1FileReader {
 
 	@Deprecated
 	public static void read(Reader reader, MappingVisitor visitor) throws IOException {
-		read(reader, visitor, new ThrowingErrorCollector(Severity.ERROR));
+		read(reader, visitor, new ThrowingErrorSink(Severity.ERROR));
 	}
 
-	public static void read(Reader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		read(new ColumnFileReader(reader, '\t', '\t'), visitor, errorCollector);
 	}
 
-	private static void read(ColumnFileReader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void read(ColumnFileReader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		if (!reader.nextCol("v1")) { // magic/version
 			throw new IOException("invalid/unsupported tiny file: no tiny 1 header");
 		}
@@ -203,7 +203,7 @@ public final class Tiny1FileReader {
 		}
 	}
 
-	private static void readDstNames(ColumnFileReader reader, MappedElementKind subjectKind, int dstNsCount, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readDstNames(ColumnFileReader reader, MappedElementKind subjectKind, int dstNsCount, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		for (int dstNs = 0; dstNs < dstNsCount; dstNs++) {
 			String name = reader.nextCol();
 

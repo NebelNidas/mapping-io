@@ -31,9 +31,9 @@ import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.NopMappingVisitor;
 import net.fabricmc.mappingio.format.ErrorCollector;
-import net.fabricmc.mappingio.format.ErrorCollector.ParsingError;
-import net.fabricmc.mappingio.format.ErrorCollector.Severity;
 import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.format.ParsingError;
+import net.fabricmc.mappingio.format.ParsingError.Severity;
 
 public class InvalidContentReadTest {
 	private static final String tinyHeader = "v1	source	target\n";

@@ -28,10 +28,10 @@ import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingUtil;
 import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.format.ColumnFileReader;
-import net.fabricmc.mappingio.format.ErrorCollector;
-import net.fabricmc.mappingio.format.ErrorCollector.Severity;
-import net.fabricmc.mappingio.format.ErrorCollector.ThrowingErrorCollector;
+import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.format.ThrowingErrorSink;
+import net.fabricmc.mappingio.format.ParsingError.Severity;
 
 /**
  * {@linkplain MappingFormat#CSRG_FILE CSRG file},
@@ -69,16 +69,16 @@ public final class TsrgFileReader {
 		read(reader, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor);
 	}
 
-	public static void read(Reader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		read(new ColumnFileReader(reader, '\t', ' '), MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorCollector);
 	}
 
 	@Deprecated
 	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		read(new ColumnFileReader(reader, '\t', ' '), sourceNs, targetNs, visitor, new ThrowingErrorCollector(Severity.ERROR));
+		read(new ColumnFileReader(reader, '\t', ' '), sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.ERROR));
 	}
 
-	public static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		MappingFormat format = reader.nextCol("tsrg2") ? format = MappingFormat.TSRG_2_FILE : MappingFormat.TSRG_FILE;
 		String srcNamespace;
 		List<String> dstNamespaces;
@@ -206,7 +206,7 @@ public final class TsrgFileReader {
 		}
 	}
 
-	private static boolean readClass(ColumnFileReader reader, boolean isTsrg2, int dstNsCount, List<String> nameTmp, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static boolean readClass(ColumnFileReader reader, boolean isTsrg2, int dstNsCount, List<String> nameTmp, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		readDstNames(reader, MappedElementKind.CLASS, 0, dstNsCount, visitor, errorCollector);
 		if (!visitor.visitElementContent(MappedElementKind.CLASS)) return false;
 
@@ -295,7 +295,7 @@ public final class TsrgFileReader {
 		return true;
 	}
 
-	private static void readMethod(ColumnFileReader reader, int dstNsCount, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readMethod(ColumnFileReader reader, int dstNsCount, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		readDstNames(reader, MappedElementKind.METHOD, 0, dstNsCount, visitor, errorCollector);
 		if (!visitor.visitElementContent(MappedElementKind.METHOD)) return;
 
@@ -333,12 +333,12 @@ public final class TsrgFileReader {
 		}
 	}
 
-	private static void readElement(ColumnFileReader reader, MappedElementKind kind, int dstNsOffset, int dstNsCount, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readElement(ColumnFileReader reader, MappedElementKind kind, int dstNsOffset, int dstNsCount, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		readDstNames(reader, kind, dstNsOffset, dstNsCount, visitor, errorCollector);
 		visitor.visitElementContent(kind);
 	}
 
-	private static void readDstNames(ColumnFileReader reader, MappedElementKind subjectKind, int dstNsOffset, int dstNsCount, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readDstNames(ColumnFileReader reader, MappedElementKind subjectKind, int dstNsOffset, int dstNsCount, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		for (int dstNs = dstNsOffset; dstNs < dstNsCount; dstNs++) {
 			String name = reader.nextCol();
 

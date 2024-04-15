@@ -17,27 +17,23 @@
 package net.fabricmc.mappingio.format;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.jetbrains.annotations.ApiStatus;
 
 import net.fabricmc.mappingio.format.ParsingError.Severity;
 
-public interface ErrorCollector extends ErrorSink {
-	static ErrorCollector create() {
-		return new ErrorCollector() {
-			@Override
-			public void add(Severity severity, String message) throws IOException {
-				errors.add(ParsingError.create(severity, message));
-			}
-
-			@Override
-			public List<ParsingError> getErrors() {
-				return errors;
-			}
-
-			private final List<ParsingError> errors = new ArrayList<>();
-		};
+@ApiStatus.Internal
+public final class ThrowingErrorSink implements ErrorSink {
+	public ThrowingErrorSink(Severity severityToThrowAt) {
+		this.severityToThrowAt = severityToThrowAt;
 	}
 
-	List<ParsingError> getErrors();
+	@Override
+	public void add(Severity severity, String message) throws IOException {
+		if (severity.compareTo(severityToThrowAt) >= 0) {
+			throw new IOException(message);
+		}
+	}
+
+	private Severity severityToThrowAt;
 }

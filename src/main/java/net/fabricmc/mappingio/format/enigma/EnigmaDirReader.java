@@ -29,10 +29,10 @@ import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingUtil;
 import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.adapter.ForwardingMappingVisitor;
-import net.fabricmc.mappingio.format.ErrorCollector;
-import net.fabricmc.mappingio.format.ErrorCollector.Severity;
-import net.fabricmc.mappingio.format.ErrorCollector.ThrowingErrorCollector;
+import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.format.ThrowingErrorSink;
+import net.fabricmc.mappingio.format.ParsingError.Severity;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
@@ -51,16 +51,16 @@ public final class EnigmaDirReader {
 		read(dir, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor);
 	}
 
-	public static void read(Path dir, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Path dir, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		read(dir, MappingUtil.NS_SOURCE_FALLBACK, MappingUtil.NS_TARGET_FALLBACK, visitor, errorCollector);
 	}
 
 	@Deprecated
 	public static void read(Path dir, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		read(dir, sourceNs, targetNs, visitor, new ThrowingErrorCollector(Severity.ERROR));
+		read(dir, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.ERROR));
 	}
 
-	public static void read(Path dir, String sourceNs, String targetNs, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Path dir, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		Set<MappingFlag> flags = visitor.getFlags();
 		MappingVisitor parentVisitor = null;
 

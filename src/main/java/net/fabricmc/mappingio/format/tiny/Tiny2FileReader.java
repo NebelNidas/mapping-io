@@ -25,10 +25,10 @@ import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.format.ColumnFileReader;
-import net.fabricmc.mappingio.format.ErrorCollector;
-import net.fabricmc.mappingio.format.ErrorCollector.Severity;
-import net.fabricmc.mappingio.format.ErrorCollector.ThrowingErrorCollector;
+import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
+import net.fabricmc.mappingio.format.ThrowingErrorSink;
+import net.fabricmc.mappingio.format.ParsingError.Severity;
 
 /**
  * {@linkplain MappingFormat#TINY_2 Tiny v2 file} reader.
@@ -63,14 +63,14 @@ public final class Tiny2FileReader {
 
 	@Deprecated
 	public static void read(Reader reader, MappingVisitor visitor) throws IOException {
-		read(new ColumnFileReader(reader, '\t', '\t'), visitor, new ThrowingErrorCollector(Severity.ERROR));
+		read(new ColumnFileReader(reader, '\t', '\t'), visitor, new ThrowingErrorSink(Severity.ERROR));
 	}
 
-	public static void read(Reader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		read(new ColumnFileReader(reader, '\t', '\t'), visitor, errorCollector);
 	}
 
-	private static void read(ColumnFileReader reader, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void read(ColumnFileReader reader, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		if (!reader.nextCol("tiny") // magic
 				|| reader.nextIntCol(true) != 2 // major version
 				|| reader.nextIntCol(true) < 0) { // minor version
@@ -150,7 +150,7 @@ public final class Tiny2FileReader {
 		}
 	}
 
-	private static void readClass(ColumnFileReader reader, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readClass(ColumnFileReader reader, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		readDstNames(reader, MappedElementKind.CLASS, dstNsCount, escapeNames, visitor, errorCollector);
 		if (!visitor.visitElementContent(MappedElementKind.CLASS)) return;
 
@@ -197,7 +197,7 @@ public final class Tiny2FileReader {
 		}
 	}
 
-	private static void readMethod(ColumnFileReader reader, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readMethod(ColumnFileReader reader, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		readDstNames(reader, MappedElementKind.METHOD, dstNsCount, escapeNames, visitor, errorCollector);
 		if (!visitor.visitElementContent(MappedElementKind.METHOD)) return;
 
@@ -292,7 +292,7 @@ public final class Tiny2FileReader {
 		}
 	}
 
-	private static void readElement(ColumnFileReader reader, MappedElementKind kind, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readElement(ColumnFileReader reader, MappedElementKind kind, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		readDstNames(reader, kind, dstNsCount, escapeNames, visitor, errorCollector);
 		if (!visitor.visitElementContent(kind)) return;
 
@@ -303,7 +303,7 @@ public final class Tiny2FileReader {
 		}
 	}
 
-	private static void readComment(ColumnFileReader reader, MappedElementKind subjectKind, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readComment(ColumnFileReader reader, MappedElementKind subjectKind, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		String comment = reader.nextCol(true);
 
 		if (comment == null) {
@@ -314,7 +314,7 @@ public final class Tiny2FileReader {
 		visitor.visitComment(subjectKind, comment);
 	}
 
-	private static void readDstNames(ColumnFileReader reader, MappedElementKind subjectKind, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorCollector errorCollector) throws IOException {
+	private static void readDstNames(ColumnFileReader reader, MappedElementKind subjectKind, int dstNsCount, boolean escapeNames, MappingVisitor visitor, ErrorSink errorCollector) throws IOException {
 		for (int dstNs = 0; dstNs < dstNsCount; dstNs++) {
 			String name = reader.nextCol(escapeNames);
 
