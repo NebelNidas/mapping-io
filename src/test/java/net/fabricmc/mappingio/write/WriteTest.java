@@ -26,8 +26,8 @@ import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.SubsetAssertingVisitor;
 import net.fabricmc.mappingio.TestHelper;
 import net.fabricmc.mappingio.adapter.FlatAsRegularMappingVisitor;
+import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
-import net.fabricmc.mappingio.format.ThrowingErrorSink;
 import net.fabricmc.mappingio.format.ParsingError.Severity;
 import net.fabricmc.mappingio.tree.MappingTreeView;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
@@ -119,7 +119,7 @@ public class WriteTest {
 		outputPath = TestHelper.writeToDir(origTree, dir, outputFormat);
 		VisitableMappingTree writtenTree = new MemoryMappingTree();
 
-		MappingReader.read(outputPath, outputFormat, writtenTree, new ThrowingErrorSink(Severity.INFO));
+		MappingReader.read(outputPath, outputFormat, writtenTree, ErrorSink.throwingOnSeverity(Severity.INFO));
 
 		writtenTree.accept(new FlatAsRegularMappingVisitor(new SubsetAssertingVisitor(origTree, null, outputFormat)));
 		origTree.accept(new FlatAsRegularMappingVisitor(new SubsetAssertingVisitor(writtenTree, outputFormat, null)));

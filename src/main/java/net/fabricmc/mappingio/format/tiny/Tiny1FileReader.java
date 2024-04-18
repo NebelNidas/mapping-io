@@ -28,7 +28,6 @@ import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.format.ColumnFileReader;
 import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
-import net.fabricmc.mappingio.format.ThrowingErrorSink;
 import net.fabricmc.mappingio.format.ParsingError.Severity;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
@@ -64,7 +63,7 @@ public final class Tiny1FileReader {
 
 	@Deprecated
 	public static void read(Reader reader, MappingVisitor visitor) throws IOException {
-		read(reader, visitor, new ThrowingErrorSink(Severity.WARNING));
+		read(reader, visitor, ErrorSink.throwingOnSeverity(Severity.WARNING));
 	}
 
 	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorSink) throws IOException {

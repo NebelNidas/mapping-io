@@ -29,7 +29,6 @@ import net.fabricmc.mappingio.MappingUtil;
 import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
-import net.fabricmc.mappingio.format.ThrowingErrorSink;
 import net.fabricmc.mappingio.format.ParsingError.Severity;
 
 /**
@@ -53,7 +52,7 @@ public final class ProGuardFileReader {
 
 	@Deprecated
 	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		read(reader, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.WARNING));
+		read(reader, sourceNs, targetNs, visitor, ErrorSink.throwingOnSeverity(Severity.WARNING));
 	}
 
 	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorSink) throws IOException {

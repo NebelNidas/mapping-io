@@ -31,7 +31,6 @@ import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.adapter.ForwardingMappingVisitor;
 import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
-import net.fabricmc.mappingio.format.ThrowingErrorSink;
 import net.fabricmc.mappingio.format.ParsingError.Severity;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
@@ -57,7 +56,7 @@ public final class EnigmaDirReader {
 
 	@Deprecated
 	public static void read(Path dir, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		read(dir, sourceNs, targetNs, visitor, new ThrowingErrorSink(Severity.WARNING));
+		read(dir, sourceNs, targetNs, visitor, ErrorSink.throwingOnSeverity(Severity.WARNING));
 	}
 
 	public static void read(Path dir, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorSink) throws IOException {

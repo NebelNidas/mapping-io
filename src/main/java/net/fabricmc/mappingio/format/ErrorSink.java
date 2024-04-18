@@ -29,6 +29,17 @@ public interface ErrorSink {
 		};
 	}
 
+	/**
+	 * Create an ErrorSink that throws an exception when an error
+	 * of the specified severity (or higher) is encountered.
+	 *
+	 * @param severity The severity to throw on.
+	 * @return The constructed ErrorSink instance.
+	 */
+	static ErrorSink throwingOnSeverity(Severity severity) {
+		return new ThrowingErrorSink(severity);
+	}
+
 	default void addInfo(String message) throws IOException {
 		add(Severity.INFO, message);
 	}

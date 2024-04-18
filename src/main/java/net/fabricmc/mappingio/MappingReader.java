@@ -30,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
-import net.fabricmc.mappingio.format.ThrowingErrorSink;
 import net.fabricmc.mappingio.format.ParsingError.Severity;
 import net.fabricmc.mappingio.format.enigma.EnigmaDirReader;
 import net.fabricmc.mappingio.format.enigma.EnigmaFileReader;
@@ -238,7 +237,7 @@ public final class MappingReader {
 	 */
 	@Deprecated
 	public static void read(Path path, MappingFormat format, MappingVisitor visitor) throws IOException {
-		read(path, format, visitor, new ThrowingErrorSink(Severity.WARNING));
+		read(path, format, visitor, ErrorSink.throwingOnSeverity(Severity.WARNING));
 	}
 
 	/**
@@ -304,7 +303,7 @@ public final class MappingReader {
 	 */
 	@Deprecated
 	public static void read(Reader reader, MappingFormat format, MappingVisitor visitor) throws IOException {
-		read(reader, format, visitor, new ThrowingErrorSink(Severity.WARNING));
+		read(reader, format, visitor, ErrorSink.throwingOnSeverity(Severity.WARNING));
 	}
 
 	/**

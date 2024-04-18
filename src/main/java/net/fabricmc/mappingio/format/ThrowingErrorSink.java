@@ -18,13 +18,10 @@ package net.fabricmc.mappingio.format;
 
 import java.io.IOException;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import net.fabricmc.mappingio.format.ParsingError.Severity;
 
-@ApiStatus.Internal
-public final class ThrowingErrorSink implements ErrorSink {
-	public ThrowingErrorSink(Severity severityToThrowAt) {
+final class ThrowingErrorSink implements ErrorSink {
+	ThrowingErrorSink(Severity severityToThrowAt) {
 		this.severityToThrowAt = severityToThrowAt;
 	}
 

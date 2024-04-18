@@ -27,7 +27,6 @@ import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.format.ColumnFileReader;
 import net.fabricmc.mappingio.format.ErrorSink;
 import net.fabricmc.mappingio.format.MappingFormat;
-import net.fabricmc.mappingio.format.ThrowingErrorSink;
 import net.fabricmc.mappingio.format.ParsingError.Severity;
 
 /**
@@ -63,7 +62,7 @@ public final class Tiny2FileReader {
 
 	@Deprecated
 	public static void read(Reader reader, MappingVisitor visitor) throws IOException {
-		read(new ColumnFileReader(reader, '\t', '\t'), visitor, new ThrowingErrorSink(Severity.WARNING));
+		read(new ColumnFileReader(reader, '\t', '\t'), visitor, ErrorSink.throwingOnSeverity(Severity.WARNING));
 	}
 
 	public static void read(Reader reader, MappingVisitor visitor, ErrorSink errorSink) throws IOException {

@@ -24,7 +24,6 @@ import java.io.StringReader;
 import org.junit.jupiter.api.Test;
 
 import net.fabricmc.mappingio.format.ErrorSink;
-import net.fabricmc.mappingio.format.ThrowingErrorSink;
 import net.fabricmc.mappingio.format.ParsingError.Severity;
 import net.fabricmc.mappingio.format.enigma.EnigmaFileReader;
 import net.fabricmc.mappingio.format.jobf.JobfFileReader;
@@ -40,7 +39,7 @@ import net.fabricmc.mappingio.tree.VisitableMappingTree;
 
 public class EmptyContentReadTest {
 	private static final VisitableMappingTree tree = new MemoryMappingTree();
-	private static final ErrorSink errorSink = new ThrowingErrorSink(Severity.INFO);
+	private static final ErrorSink errorSink = ErrorSink.throwingOnSeverity(Severity.INFO);
 
 	@Test
 	public void emptyEnigmaFile() throws Exception {
