@@ -22,6 +22,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -33,15 +34,15 @@ public class I18n {
 	private I18n() {
 	}
 
-	public static String translate(String key, MioLocale locale, Object... args) {
+	public static String translate(String key, Locale locale, Object... args) {
 		return String.format(translate(key, locale), args);
 	}
 
-	public static String translate(String key, MioLocale locale) {
+	public static String translate(String key, Locale locale) {
 		try {
 			return messageBundles.getOrDefault(locale, load(locale)).getString(key);
 		} catch (Exception e) {
-			System.err.println("Exception while translating key " + key + " to locale " + locale.id + ": " + e.getMessage());
+			System.err.println("Exception while translating key " + key + " to locale " + locale.toLanguageTag() + ": " + e.getMessage());
 			if (locale == fallbackLocale) return key;
 
 			try {
@@ -53,9 +54,9 @@ public class I18n {
 		}
 	}
 
-	private static ResourceBundle load(MioLocale locale) {
+	private static ResourceBundle load(Locale locale) {
 		ResourceBundle resBundle;
-		String resName = String.format("/i18n/%s.properties", locale.id);
+		String resName = String.format("/i18n/%s.properties", locale.toLanguageTag().replace('-', '_').toLowerCase(Locale.ROOT));
 		URL resUrl = I18n.class.getResource(resName);
 
 		if (resUrl == null) {
@@ -71,6 +72,6 @@ public class I18n {
 		}
 	}
 
-	private static final MioLocale fallbackLocale = MioLocale.EN_US;
-	private static final Map<MioLocale, ResourceBundle> messageBundles = new HashMap<>();
+	private static final Locale fallbackLocale = Locale.US;
+	private static final Map<Locale, ResourceBundle> messageBundles = new HashMap<>();
 }

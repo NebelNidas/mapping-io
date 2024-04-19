@@ -18,8 +18,8 @@ package net.fabricmc.mappingio.format;
 
 import java.util.Locale;
 
-import net.fabricmc.mappingio.i18n.I18n;
-import net.fabricmc.mappingio.i18n.MioLocale;
+import net.fabricmc.mappingio.i18n.Translatable;
+import net.fabricmc.mappingio.i18n.TranslatableImpl;
 
 /**
  * Represents a supported mapping format. Feature comparison table:
@@ -144,16 +144,12 @@ public enum MappingFormat {
 			boolean supportsComments, boolean supportsArgs, boolean supportsLocals) {
 		this.fileExt = fileExt;
 		this.translationKey = "format." + name().toLowerCase(Locale.ROOT);
-		this.name = getName(MioLocale.EN_US);
+		this.name = getName().translate(Locale.US);
 		this.hasNamespaces = hasNamespaces;
 		this.hasFieldDescriptors = hasFieldDescriptors;
 		this.supportsComments = supportsComments;
 		this.supportsArgs = supportsArgs;
 		this.supportsLocals = supportsLocals;
-	}
-
-	public String getName(MioLocale locale) {
-		return I18n.translate(translationKey, locale);
 	}
 
 	public boolean hasSingleFile() {
@@ -166,7 +162,13 @@ public enum MappingFormat {
 		return "*."+fileExt;
 	}
 
-	/** @deprecated Use {@link #getName()} instead. */
+	public Translatable getName() {
+		return new TranslatableImpl(translationKey);
+	}
+
+	/**
+	 * @deprecated Use {@link #getName()} instead.
+	 */
 	public final String name;
 	public final String fileExt;
 	public final boolean hasNamespaces;

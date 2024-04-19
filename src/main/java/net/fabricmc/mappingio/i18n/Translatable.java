@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 FabricMC
+ * Copyright (c) 2024 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package net.fabricmc.mappingio.i18n;
 
-public enum MioLocale {
-	EN_US("en_us");
+import java.util.Locale;
 
-	MioLocale(String id) {
-		this.id = id;
-	}
+import org.jetbrains.annotations.ApiStatus;
 
-	final String id;
+@ApiStatus.NonExtendable
+public interface Translatable {
+	/**
+	 * Translates this translatable to the specified locale, with a fallback to en_US.
+	 */
+	String translate(Locale locale);
 }

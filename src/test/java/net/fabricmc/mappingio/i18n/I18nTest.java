@@ -19,24 +19,23 @@ package net.fabricmc.mappingio.i18n;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Locale;
+
 import org.junit.jupiter.api.Test;
 
 import net.fabricmc.mappingio.format.MappingFormat;
 
 public class I18nTest {
 	@Test
-	public void mappingFormats() {
+	@SuppressWarnings("deprecation")
+	public void mappingFormatNames() {
 		for (MappingFormat format : MappingFormat.values()) {
-			String enUsName = format.getName(MioLocale.EN_US);
+			String enUsName = format.getName().translate(Locale.US);
 			assertTrue(format.name.equals(enUsName));
 
-			for (MioLocale locale : MioLocale.values()) {
-				String translatedName = format.getName(locale);
+			for (Locale locale : Locale.getAvailableLocales()) {
+				String translatedName = format.getName().translate(locale);
 				assertFalse(translatedName.startsWith("format."));
-
-				if (locale != MioLocale.EN_US) {
-					assertFalse(translatedName.equals(enUsName));
-				}
 			}
 		}
 	}
