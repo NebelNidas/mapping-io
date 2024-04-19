@@ -16,8 +16,8 @@
 
 package net.fabricmc.mappingio.i18n;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.net.URL;
@@ -55,7 +55,7 @@ public class I18nTest {
 	public void mappingFormatNames() {
 		for (MappingFormat format : MappingFormat.values()) {
 			String enUsName = format.getName().translate(Locale.US);
-			assertTrue(format.name.equals(enUsName));
+			assertEquals(enUsName, format.name);
 
 			for (Locale locale : supportedLocales) {
 				String translatedName = format.getName().translate(locale);
