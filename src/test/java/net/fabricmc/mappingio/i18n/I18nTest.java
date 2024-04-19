@@ -19,13 +19,37 @@ package net.fabricmc.mappingio.i18n;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import net.fabricmc.mappingio.format.MappingFormat;
 
 public class I18nTest {
+	private static List<Locale> supportedLocales;
+
+	@BeforeAll
+	public static void init() throws Exception {
+		URL i18nUrl = I18nTest.class.getResource("/i18n/");
+		Path path = Paths.get(i18nUrl.toURI());
+
+		supportedLocales = Files.walk(path)
+				.map(Path::toAbsolutePath)
+				.map(Path::toString)
+				.filter(name -> name.endsWith(".properties"))
+				.map(name -> name.substring(Math.max(0, name.lastIndexOf(File.separatorChar) + 1), name.length() - ".properties".length()))
+				.map(tag -> Locale.forLanguageTag(tag))
+				.collect(Collectors.toList());
+	}
+
 	@Test
 	@SuppressWarnings("deprecation")
 	public void mappingFormatNames() {
@@ -33,9 +57,9 @@ public class I18nTest {
 			String enUsName = format.getName().translate(Locale.US);
 			assertTrue(format.name.equals(enUsName));
 
-			for (Locale locale : Locale.getAvailableLocales()) {
+			for (Locale locale : supportedLocales) {
 				String translatedName = format.getName().translate(locale);
-				assertFalse(translatedName.startsWith("format."));
+				assertFalse(translatedName.startsWith("format."), "Translated name for " + format + " in " + locale + " is missing");
 			}
 		}
 	}
