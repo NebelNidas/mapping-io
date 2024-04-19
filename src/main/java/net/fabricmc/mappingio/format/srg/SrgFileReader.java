@@ -26,9 +26,17 @@ import net.fabricmc.mappingio.MappingFlag;
 import net.fabricmc.mappingio.MappingUtil;
 import net.fabricmc.mappingio.MappingVisitor;
 import net.fabricmc.mappingio.format.ColumnFileReader;
+import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
+/**
+ * {@linkplain MappingFormat#SRG_FILE SRG file} and
+ * {@linkplain MappingFormat#XSRG_FILE XSRG file} reader.
+ *
+ * <p>Crashes if a second visit pass is requested without
+ * {@link MappingFlag#NEEDS_MULTIPLE_PASSES} having been passed beforehand.
+ */
 public final class SrgFileReader {
 	private SrgFileReader() {
 	}
@@ -38,24 +46,25 @@ public final class SrgFileReader {
 	}
 
 	public static void read(Reader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		read(new ColumnFileReader(reader, ' '), sourceNs, targetNs, visitor);
+		read(new ColumnFileReader(reader, '\t', ' '), sourceNs, targetNs, visitor);
 	}
 
 	private static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
+		MappingFormat format = MappingFormat.SRG_FILE;
 		Set<MappingFlag> flags = visitor.getFlags();
 		MappingVisitor parentVisitor = null;
+		boolean readerMarked = false;
 
 		if (flags.contains(MappingFlag.NEEDS_ELEMENT_UNIQUENESS)) {
 			parentVisitor = visitor;
 			visitor = new MemoryMappingTree();
 		} else if (flags.contains(MappingFlag.NEEDS_MULTIPLE_PASSES)) {
 			reader.mark();
+			readerMarked = true;
 		}
 
 		for (;;) {
-			boolean visitHeader = visitor.visitHeader();
-
-			if (visitHeader) {
+			if (visitor.visitHeader()) {
 				visitor.visitNamespaces(sourceNs, Collections.singletonList(targetNs));
 			}
 
@@ -89,20 +98,33 @@ public final class SrgFileReader {
 						int srcSepPos = src.lastIndexOf('/');
 						if (srcSepPos <= 0 || srcSepPos == src.length() - 1) throw new IOException("invalid class/name a in line "+reader.getLineNumber());
 
-						String srcDesc;
+						String[] cols = new String[3];
 
-						if (isMethod) {
-							srcDesc = reader.nextCol();
-							if (srcDesc == null || srcDesc.isEmpty()) throw new IOException("missing desc a in line "+reader.getLineNumber());
-						} else {
-							srcDesc = null;
+						for (int i = 0; i < 3; i++) {
+							cols[i] = reader.nextCol();
 						}
 
-						String dst = reader.nextCol();
-						if (dst == null) throw new IOException("missing class/name b in line "+reader.getLineNumber());
+						if (!isMethod && cols[1] != null && cols[2] != null) format = MappingFormat.XSRG_FILE;
+						String srcDesc;
+						String dstName;
+						String dstDesc;
 
-						int dstSepPos = dst.lastIndexOf('/');
-						if (dstSepPos <= 0 || dstSepPos == dst.length() - 1) throw new IOException("invalid class/name b in line "+reader.getLineNumber());
+						if (isMethod || format == MappingFormat.XSRG_FILE) {
+							srcDesc = cols[0];
+							if (srcDesc == null || srcDesc.isEmpty()) throw new IOException("missing desc a in line "+reader.getLineNumber());
+							dstName = cols[1];
+							dstDesc = cols[2];
+							if (dstDesc == null || dstDesc.isEmpty()) throw new IOException("missing desc b in line "+reader.getLineNumber());
+						} else {
+							srcDesc = null;
+							dstName = cols[0];
+							dstDesc = null;
+						}
+
+						if (dstName == null) throw new IOException("missing class/name b in line "+reader.getLineNumber());
+
+						int dstSepPos = dstName.lastIndexOf('/');
+						if (dstSepPos <= 0 || dstSepPos == dstName.length() - 1) throw new IOException("invalid class/name b in line "+reader.getLineNumber());
 
 						String srcOwner = src.substring(0, srcSepPos);
 
@@ -111,7 +133,7 @@ public final class SrgFileReader {
 							visitLastClass = visitor.visitClass(srcOwner);
 
 							if (visitLastClass) {
-								visitor.visitDstName(MappedElementKind.CLASS, 0, dst.substring(0, dstSepPos));
+								visitor.visitDstName(MappedElementKind.CLASS, 0, dstName.substring(0, dstSepPos));
 								visitLastClass = visitor.visitElementContent(MappedElementKind.CLASS);
 							}
 						}
@@ -122,7 +144,8 @@ public final class SrgFileReader {
 							if (isMethod && visitor.visitMethod(srcName, srcDesc)
 									|| !isMethod && visitor.visitField(srcName, srcDesc)) {
 								MappedElementKind kind = isMethod ? MappedElementKind.METHOD : MappedElementKind.FIELD;
-								visitor.visitDstName(kind, 0, dst.substring(dstSepPos + 1));
+								visitor.visitDstName(kind, 0, dstName.substring(dstSepPos + 1));
+								visitor.visitDstDesc(kind, 0, dstDesc);
 								visitor.visitElementContent(kind);
 							}
 						}
@@ -132,7 +155,12 @@ public final class SrgFileReader {
 
 			if (visitor.visitEnd()) break;
 
-			reader.reset();
+			if (!readerMarked) {
+				throw new IllegalStateException("repeated visitation requested without NEEDS_MULTIPLE_PASSES");
+			}
+
+			int markIdx = reader.reset();
+			assert markIdx == 1;
 		}
 
 		if (parentVisitor != null) {

@@ -18,138 +18,132 @@ package net.fabricmc.mappingio.format;
 
 import java.util.Locale;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.fabricmc.mappingio.i18n.Translatable;
 import net.fabricmc.mappingio.i18n.TranslatableImpl;
 
 /**
- * Represents a supported mapping format. Feature comparison table:
- * <table>
- *   <tr>
- *     <th>Format</th>
- *     <th>Namespaces</th>
- *     <th>Field descriptors</th>
- *     <th>Comments</th>
- *     <th>Parameters</th>
- *     <th>Local variables</th>
- *     <th>Metadata</th>
- *   </tr>
- *   <tr>
- *     <td>Tiny v1</td>
- *     <td>✔</td>
- *     <td>✔</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✔ (Currently limited support)</td>
- *   </tr>
- *   <tr>
- *     <td>Tiny v2</td>
- *     <td>✔</td>
- *     <td>✔</td>
- *     <td>✔</td>
- *     <td>✔</td>
- *     <td>✔</td>
- *     <td>✔</td>
- *   </tr>
- *   <tr>
- *     <td>Enigma</td>
- *     <td>✖</td>
- *     <td>✔</td>
- *     <td>✔</td>
- *     <td>✔</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *   </tr>
- *   <tr>
- *     <td>SRG</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *   </tr>
- *   <tr>
- *     <td>TSRG</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *   </tr>
- *   <tr>
- *     <td>TSRG2</td>
- *     <td>✔</td>
- *     <td>✔</td>
- *     <td>✖</td>
- *     <td>✔</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *   </tr>
- *   <tr>
- *     <td>ProGuard</td>
- *     <td>✖</td>
- *     <td>✔</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *     <td>✖</td>
- *   </tr>
- * </table>
+ * Represents a supported mapping format. Every format can be assumed to have an associated reader available.
+ *
+ * <p>A feature comparison table can be found <a href="https://fabricmc.net/wiki/documentation:mapping_formats">here</a>.
  */
-// Format order is determined by importance to Fabric tooling, format family and release order therein.
+// Format order is determined by importance to Fabric tooling, format family and release order therein (synced with the table linked above).
 public enum MappingFormat {
 	/**
 	 * The {@code Tiny} mapping format, as specified <a href="https://fabricmc.net/wiki/documentation:tiny">here</a>.
+	 *
+	 * <h2>Implementation notes</h2>
+	 * File metadata only has limited support as of now, and is hardcoded to intermediary counters.
 	 */
-	TINY_FILE("tiny", true, true, false, false, false),
+	TINY_FILE("tiny", true, true, false, false, false, true),
 
 	/**
 	 * The {@code Tiny v2} mapping format, as specified <a href="https://fabricmc.net/wiki/documentation:tiny2">here</a>.
 	 */
-	TINY_2_FILE("tiny", true, true, true, true, true),
+	TINY_2_FILE("tiny", true, true, true, true, true, true),
 
 	/**
 	 * Enigma's mapping format, as specified <a href="https://fabricmc.net/wiki/documentation:enigma_mappings">here</a>.
+	 *
+	 * <h2>Implementation notes</h2>
+	 * Access modifiers are currently not supported.
 	 */
-	ENIGMA_FILE("mapping", false, true, true, true, false),
+	ENIGMA_FILE("mapping", false, true, true, true, false, true),
 
 	/**
 	 * Enigma's mapping format (in directory form), as specified <a href="https://fabricmc.net/wiki/documentation:enigma_mappings">here</a>.
+	 *
+	 * <h2>Implementation notes</h2>
+	 * Access modifiers are currently not supported.
 	 */
-	ENIGMA_DIR(null, false, true, true, true, false),
+	ENIGMA_DIR(null, false, true, true, true, false, true),
 
 	/**
-	 * The {@code SRG} ({@code Searge RetroGuard}) mapping format, as specified <a href="https://github.com/MinecraftForge/SrgUtils/blob/67f30647ece29f18256ca89a23cda6216d6bd21e/src/main/java/net/minecraftforge/srgutils/InternalUtils.java#L69-L81">here</a>.
+	 * The {@code SRG} ("Searge RetroGuard") mapping format, as specified <a href="https://github.com/MinecraftForge/SrgUtils/blob/67f30647ece29f18256ca89a23cda6216d6bd21e/src/main/java/net/minecraftforge/srgutils/InternalUtils.java#L69-L81">here</a>.
+	 *
+	 * <h2>Implementation notes</h2>
+	 * Package mappings are currently not supported.
 	 */
-	SRG_FILE("srg", false, false, false, false, false),
+	SRG_FILE("srg", false, false, false, false, false, true),
 
 	/**
-	 * The {@code TSRG} ({@code Tiny SRG}, since it saves disk space over SRG) mapping format, as specified <a href="https://github.com/MinecraftForge/SrgUtils/blob/67f30647ece29f18256ca89a23cda6216d6bd21e/src/main/java/net/minecraftforge/srgutils/InternalUtils.java#L196-L213">here</a>.
+	 * The {@code XSRG} ("Extended SRG") mapping format, as specified <a href="https://github.com/MinecraftForge/SrgUtils/blob/67f30647ece29f18256ca89a23cda6216d6bd21e/src/main/java/net/minecraftforge/srgutils/InternalUtils.java#L69-L84">here</a>.
+	 * Same as SRG, but with field descriptors.
+	 *
+	 * <h2>Implementation notes</h2>
+	 * Package mappings are currently not supported.
 	 */
-	TSRG_FILE("tsrg", false, false, false, false, false),
+	XSRG_FILE("xsrg", false, true, false, false, false, true),
+
+	/**
+	 * The {@code JAM} ("Java Associated Mapping"; formerly {@code SRGX}) mapping format, as specified <a href="https://github.com/caseif/JAM">here</a>.
+	 */
+	JAM_FILE("jam", false, true, false, true, false, true),
+
+	/**
+	 * The {@code CSRG} ("Compact SRG", since it saves disk space over SRG) mapping format, as specified <a href="https://github.com/MinecraftForge/SrgUtils/blob/67f30647ece29f18256ca89a23cda6216d6bd21e/src/main/java/net/minecraftforge/srgutils/InternalUtils.java#L196-L207">here</a>.
+	 *
+	 * <h2>Implementation notes</h2>
+	 * Package mappings are currently not supported.
+	 */
+	CSRG_FILE("csrg", false, false, false, false, false, true),
+
+	/**
+	 * The {@code TSRG} ("Tiny SRG", since it saves disk space over SRG) mapping format, as specified <a href="https://github.com/MinecraftForge/SrgUtils/blob/67f30647ece29f18256ca89a23cda6216d6bd21e/src/main/java/net/minecraftforge/srgutils/InternalUtils.java#L196-L213">here</a>.
+	 * Same as CSRG, but hierarchical instead of flat.
+	 *
+	 * <h2>Implementation notes</h2>
+	 * Package mappings are currently not supported.
+	 */
+	TSRG_FILE("tsrg", false, false, false, false, false, true),
 
 	/**
 	 * The {@code TSRG v2} mapping format, as specified <a href="https://github.com/MinecraftForge/SrgUtils/blob/67f30647ece29f18256ca89a23cda6216d6bd21e/src/main/java/net/minecraftforge/srgutils/InternalUtils.java#L262-L285">here</a>.
+	 *
+	 * <h2>Implementation notes</h2>
+	 * Package mappings and static markers for methods are currently not supported.
 	 */
-	TSRG_2_FILE("tsrg", true, true, false, true, false),
+	TSRG_2_FILE("tsrg", true, true, false, true, false, true),
 
 	/**
 	 * ProGuard's mapping format, as specified <a href="https://www.guardsquare.com/manual/tools/retrace">here</a>.
+	 *
+	 * <h2>Implementation notes</h2>
+	 * Line numbers are currently not supported.
 	 */
-	PROGUARD_FILE("txt", false, true, false, false, false);
+	PROGUARD_FILE("txt", false, true, false, false, false, true),
 
-	MappingFormat(String fileExt, boolean hasNamespaces, boolean hasFieldDescriptors,
-			boolean supportsComments, boolean supportsArgs, boolean supportsLocals) {
-		this.fileExt = fileExt;
+	/**
+	 * Recaf's {@code Simple} mapping format, as specified <a href="https://github.com/Col-E/Recaf/blob/e9765d4e02991a9dd48e67c9572a063c14552e7c/src/main/java/me/coley/recaf/mapping/SimpleMappings.java#L14-L23">here</a>.
+	 */
+	RECAF_SIMPLE_FILE("txt", false, true, false, false, false, true),
+
+	/**
+	 * The {@code JOBF} mapping format, as specified <a href="https://github.com/skylot/jadx/blob/2d5c0fda4a0c5d16207a5f48edb72e6efa7d5bbd/jadx-core/src/main/java/jadx/core/deobf/DeobfPresets.java">here</a>.
+	 *
+	 * <h2>Implementation notes</h2>
+	 * Package mappings are currently not supported.
+	 */
+	JOBF_FILE("jobf", false, true, false, false, false, true);
+
+	MappingFormat(@Nullable String fileExt,
+			boolean hasNamespaces, boolean hasFieldDescriptors,
+			boolean supportsComments, boolean supportsArgs, boolean supportsLocals,
+			boolean hasWriter) {
 		this.translationKey = "format." + name().toLowerCase(Locale.ROOT);
 		this.name = getName().translate(Locale.US);
+		this.fileExt = fileExt;
 		this.hasNamespaces = hasNamespaces;
 		this.hasFieldDescriptors = hasFieldDescriptors;
 		this.supportsComments = supportsComments;
 		this.supportsArgs = supportsArgs;
 		this.supportsLocals = supportsLocals;
+		this.hasWriter = hasWriter;
+	}
+
+	public Translatable getName() {
+		return new TranslatableImpl(translationKey);
 	}
 
 	public boolean hasSingleFile() {
@@ -162,19 +156,17 @@ public enum MappingFormat {
 		return "*."+fileExt;
 	}
 
-	public Translatable getName() {
-		return new TranslatableImpl(translationKey);
-	}
-
 	/**
 	 * @deprecated Use {@link #getName()} instead.
 	 */
 	public final String name;
+	@Nullable
 	public final String fileExt;
 	public final boolean hasNamespaces;
 	public final boolean hasFieldDescriptors;
 	public final boolean supportsComments;
 	public final boolean supportsArgs;
 	public final boolean supportsLocals;
+	public final boolean hasWriter;
 	private final String translationKey;
 }
