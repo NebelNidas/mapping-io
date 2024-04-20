@@ -341,7 +341,7 @@ public final class MappingReader {
 			SrgFileReader.read(reader, visitor, errorSink);
 			break;
 		case JAM_FILE:
-			JamFileReader.read(reader, visitor);
+			JamFileReader.read(reader, visitor, errorSink);
 			break;
 		case CSRG_FILE:
 		case TSRG_FILE:

@@ -287,8 +287,66 @@ public class InvalidContentReadTest {
 			prefix += " ";
 		}
 
-		checkWarning(prefix + "" + suffix, format);
+		checkWarning(prefix + " " + suffix, format);
 		checkWorks(prefix + "dst" + suffix, format);
+	}
+
+	@Test
+	public void jamFile() throws Exception {
+		MappingFormat format = MappingFormat.JAM_FILE;
+
+		checkJamLine(MappedElementKind.CLASS, format);
+		checkJamLine(MappedElementKind.FIELD, format);
+		checkJamLine(MappedElementKind.METHOD, format);
+		checkJamLine(MappedElementKind.METHOD_ARG, format);
+	}
+
+	private void checkJamLine(MappedElementKind kind, MappingFormat format) throws Exception {
+		String prefix;
+
+		switch (kind) {
+		case CLASS:
+			prefix = "CL";
+			break;
+		case FIELD:
+			prefix = "FD";
+			break;
+		case METHOD:
+			prefix = "MD";
+			break;
+		case METHOD_ARG:
+			prefix = "MP";
+			break;
+		default:
+			throw new IllegalArgumentException("Invalid kind: " + kind);
+		}
+
+		// No source/target
+		checkError(prefix, format);
+
+		// Spaces for separation
+		checkError(prefix += " ", format);
+		check(prefix += "src", format, true, kind == MappedElementKind.CLASS ? Severity.WARNING : Severity.ERROR);
+
+		if (kind != MappedElementKind.CLASS) {
+			checkError(prefix += " ", format);
+			checkWarning(prefix += "src", format);
+			checkWarning(prefix += " ", format);
+
+			prefix += (kind == MappedElementKind.FIELD ? "I" : "()V");
+
+			if (kind != MappedElementKind.METHOD_ARG) {
+				checkWarning(prefix, format);
+			} else {
+				checkError(prefix, format);
+				checkError(prefix += " ", format);
+				checkError(prefix + "-1", format);
+				checkWarning(prefix += "0", format);
+			}
+		}
+
+		checkWarning(prefix += " ", format);
+		checkWorks(prefix += "dst", format);
 	}
 
 	private void checkThrows(String fileContent, MappingFormat format) throws Exception {
