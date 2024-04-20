@@ -219,7 +219,7 @@ public final class Tiny2FileReader {
 				String srcName = reader.nextCol(escapeNames);
 
 				if (srcName == null) {
-					errorSink.addWarning("missing var-name-a column in line "+reader.getLineNumber());
+					errorSink.addWarning("missing arg-name-a column in line "+reader.getLineNumber());
 				} else if (srcName.isEmpty()) {
 					srcName = null;
 				}

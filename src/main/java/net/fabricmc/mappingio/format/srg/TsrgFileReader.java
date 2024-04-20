@@ -221,7 +221,7 @@ public final class TsrgFileReader {
 
 			String arg = reader.nextCol();
 
-			if (arg == null) {
+			if (arg == null || arg.isEmpty()) {
 				errorSink.addError("missing desc/name-b in line "+reader.getLineNumber() + ", skipping element due to ambiguity regarding its kind");
 				continue;
 			}
@@ -232,11 +232,7 @@ public final class TsrgFileReader {
 				}
 			} else if (!isTsrg2) { // tsrg1 field, never has a desc: <nameA> <names>...
 				if (visitor.visitField(srcName, null)) {
-					if (arg.isEmpty()) {
-						errorSink.addWarning("missing field-name-b in line "+reader.getLineNumber());
-					} else {
-						visitor.visitDstName(MappedElementKind.FIELD, 0, arg);
-					}
+					visitor.visitDstName(MappedElementKind.FIELD, 0, arg);
 
 					readElement(reader, MappedElementKind.FIELD, 1, dstNsCount, visitor, errorSink);
 				}
@@ -268,6 +264,11 @@ public final class TsrgFileReader {
 					if (desc.isEmpty()) {
 						errorSink.addWarning("empty field desc in line "+reader.getLineNumber());
 						desc = null;
+					}
+
+					if (lastName.isEmpty()) {
+						errorSink.addWarning("missing field name-b in line "+reader.getLineNumber());
+						lastName = null;
 					}
 				}
 
@@ -320,10 +321,11 @@ public final class TsrgFileReader {
 				String srcName = reader.nextCol();
 
 				if (srcName == null) {
-					errorSink.addWarning("missing var-name-a column in line "+reader.getLineNumber());
+					errorSink.addWarning("missing arg-name-a column in line "+reader.getLineNumber());
+				} else if (srcName.isEmpty()) {
+					errorSink.addWarning("empty arg-name-a in line "+reader.getLineNumber());
+					srcName = null;
 				}
-
-				if (srcName.isEmpty()) srcName = null;
 
 				if (visitor.visitMethodArg(-1, lvIndex, srcName)) {
 					readElement(reader, MappedElementKind.METHOD_ARG, 0, dstNsCount, visitor, errorSink);

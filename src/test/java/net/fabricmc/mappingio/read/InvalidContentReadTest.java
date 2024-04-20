@@ -38,6 +38,7 @@ import net.fabricmc.mappingio.format.ParsingError.Severity;
 public class InvalidContentReadTest {
 	private static final String tinyHeader = "v1	source	target\n";
 	private static final String tiny2Header = "tiny	2	0	source	target\n";
+	private static final String tsrg2Header = "tsrg2 source target\n";
 
 	@Test
 	public void tinyFile() throws Exception {
@@ -87,14 +88,14 @@ public class InvalidContentReadTest {
 		checkWorks(tiny2Header, format);
 		checkError(tiny2Header + "\t", format); // missing property key
 
-		checkTiny2Line(MappedElementKind.CLASS);
-		checkTiny2Line(MappedElementKind.FIELD);
-		checkTiny2Line(MappedElementKind.METHOD);
-		checkTiny2Line(MappedElementKind.METHOD_ARG);
-		checkTiny2Line(MappedElementKind.METHOD_VAR);
+		checkTinyV2Line(MappedElementKind.CLASS);
+		checkTinyV2Line(MappedElementKind.FIELD);
+		checkTinyV2Line(MappedElementKind.METHOD);
+		checkTinyV2Line(MappedElementKind.METHOD_ARG);
+		checkTinyV2Line(MappedElementKind.METHOD_VAR);
 	}
 
-	private void checkTiny2Line(MappedElementKind kind) throws Exception {
+	private void checkTinyV2Line(MappedElementKind kind) throws Exception {
 		MappingFormat format = MappingFormat.TINY_2_FILE;
 		String prefix = tiny2Header + "c";
 
@@ -182,6 +183,7 @@ public class InvalidContentReadTest {
 		checkError(prefix + "src", format);
 		checkWorks(prefix += "0", format);
 		checkWarning(prefix += " ", format);
+		checkWorks(prefix += "dst", format);
 	}
 
 	@Test
@@ -379,6 +381,79 @@ public class InvalidContentReadTest {
 		}
 
 		checkWorks(prefix += "dst", format);
+	}
+
+	@Test
+	public void tsrgFile() throws Exception {
+		checkTsrg(MappingFormat.TSRG_FILE);
+	}
+
+	@Test
+	public void tsrgV2File() throws Exception {
+		checkTsrg(MappingFormat.TSRG_2_FILE);
+	}
+
+	private void checkTsrg(MappingFormat format) throws Exception {
+		String prefix = format == MappingFormat.TSRG_2_FILE ? tsrg2Header : "";
+
+		// Class
+		checkWorks(prefix, format);
+		checkError(prefix += "src", format);
+		checkWarning(prefix += " ", format);
+		checkWarning(prefix + " ", format);
+		checkWorks(prefix += "dst", format);
+		checkWorks(prefix += "\n", format);
+
+		// Field
+		for (int i = 0; i < 2; i++) {
+			checkError(prefix += "\t", format);
+			checkError(prefix += "src", format);
+			checkError(prefix += " ", format);
+
+			if (format == MappingFormat.TSRG_2_FILE && i == 1) {
+				checkWorks(prefix += "I", format); // detected as <srcFldName> <dstFldName>
+				checkWarning(prefix += " ", format);
+				checkWarning(prefix + " ", format);
+			}
+
+			checkWorks(prefix += "dst", format);
+			checkWorks(prefix += "\n", format);
+
+			if (format != MappingFormat.TSRG_2_FILE) break;
+		}
+
+		// Method
+		checkError(prefix += "\t", format);
+		checkError(prefix += "src", format);
+		checkError(prefix += " ", format);
+		checkError(prefix + " ", format);
+		checkError(prefix += "()V", format);
+		checkWarning(prefix += " ", format);
+		checkWarning(prefix + " ", format);
+		checkWorks(prefix += "dst", format);
+		checkWorks(prefix += "\n", format);
+
+		if (format == MappingFormat.TSRG_2_FILE) {
+			checkError(prefix += "\t", format);
+			checkWarning(prefix += "\t", format);
+			checkWorks(prefix += "static", format);
+			checkWorks(prefix += "\n", format);
+		}
+
+		// Method arg
+		if (format == MappingFormat.TSRG_2_FILE) {
+			checkError(prefix += "\t", format);
+			checkWarning(prefix += "\t", format);
+			checkWarning(prefix + " ", format);
+			checkWarning(prefix + "-1", format);
+			checkWarning(prefix += "0", format);
+			checkWarning(prefix += " ", format);
+			checkError(prefix += "src", format);
+			checkWarning(prefix += " ", format);
+			checkWarning(prefix + " ", format);
+			checkWorks(prefix += "dst", format);
+			checkWorks(prefix += "\n", format);
+		}
 	}
 
 	private void checkThrows(String fileContent, MappingFormat format) throws Exception {

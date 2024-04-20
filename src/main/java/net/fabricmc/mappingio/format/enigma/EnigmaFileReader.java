@@ -240,7 +240,7 @@ public final class EnigmaFileReader {
 
 						if (dstName != null) {
 							if (dstName.isEmpty()) {
-								errorSink.addWarning("missing var-name-b in line "+reader.getLineNumber());
+								errorSink.addWarning("missing arg-name-b in line "+reader.getLineNumber());
 							} else {
 								visitor.visitDstName(MappedElementKind.METHOD_ARG, 0, dstName);
 							}

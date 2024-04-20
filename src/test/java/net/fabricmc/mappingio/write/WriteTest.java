@@ -91,7 +91,7 @@ public class WriteTest {
 	}
 
 	@Test
-	public void tsrg2File() throws Exception {
+	public void tsrgV2File() throws Exception {
 		check(MappingFormat.TSRG_2_FILE);
 	}
 
