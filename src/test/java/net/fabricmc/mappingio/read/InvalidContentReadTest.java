@@ -456,6 +456,35 @@ public class InvalidContentReadTest {
 		}
 	}
 
+	@Test
+	public void recafSimpleFile() throws Exception {
+		MappingFormat format = MappingFormat.RECAF_SIMPLE_FILE;
+		String prefix = "";
+
+		checkWorks(prefix, format);
+		checkError(prefix += "src", format);
+		checkError(prefix += " ", format);
+		checkWorks(prefix += "dst", format);
+		checkWorks(prefix += "\n", format);
+
+		checkError(prefix += "src", format);
+		checkError(prefix += ".", format);
+		checkError(prefix += "src", format);
+		checkError(prefix += " ", format);
+		checkWorks(prefix += "I", format); // detected as <srcClsName> <dstClsName>
+		checkWorks(prefix += " ", format);
+		checkWorks(prefix += "dst", format);
+		checkWorks(prefix += "\n", format);
+
+		checkError(prefix += "src", format);
+		checkError(prefix += ".", format);
+		checkError(prefix += "src", format);
+		checkError(prefix += "()V", format);
+		checkError(prefix += " ", format);
+		checkWorks(prefix += "dst", format);
+		checkWorks(prefix += "\n", format);
+	}
+
 	private void checkThrows(String fileContent, MappingFormat format) throws Exception {
 		assertThrows(IOException.class, () -> checkWorks(fileContent, format));
 	}

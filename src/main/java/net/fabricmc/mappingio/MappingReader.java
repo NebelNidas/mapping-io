@@ -352,7 +352,7 @@ public final class MappingReader {
 			ProGuardFileReader.read(reader, visitor, errorSink);
 			break;
 		case RECAF_SIMPLE_FILE:
-			RecafSimpleFileReader.read(reader, visitor);
+			RecafSimpleFileReader.read(reader, visitor, errorSink);
 			break;
 		case JOBF_FILE:
 			JobfFileReader.read(reader, visitor);
