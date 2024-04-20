@@ -33,7 +33,7 @@ import net.fabricmc.mappingio.tree.MappingTree;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 /**
- * {@linkplain MappingFormat#RECAF_SIMPLE Recaf Simple file} reader.
+ * {@linkplain MappingFormat#RECAF_SIMPLE_FILE Recaf Simple file} reader.
  *
  * <p>Crashes if a second visit pass is requested without
  * {@link MappingFlag#NEEDS_MULTIPLE_PASSES} having been passed beforehand.
@@ -63,12 +63,14 @@ public final class RecafSimpleFileReader {
 	private static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor, ErrorSink errorSink) throws IOException {
 		Set<MappingFlag> flags = visitor.getFlags();
 		MappingVisitor parentVisitor = null;
+		boolean readerMarked = false;
 
 		if (flags.contains(MappingFlag.NEEDS_ELEMENT_UNIQUENESS)) {
 			parentVisitor = visitor;
 			visitor = new MemoryMappingTree();
 		} else if (flags.contains(MappingFlag.NEEDS_MULTIPLE_PASSES)) {
 			reader.mark();
+			readerMarked = true;
 		}
 
 		for (;;) {
@@ -151,7 +153,13 @@ public final class RecafSimpleFileReader {
 			}
 
 			if (visitor.visitEnd()) break;
-			reader.reset();
+
+			if (!readerMarked) {
+				throw new IllegalStateException("repeated visitation requested without NEEDS_MULTIPLE_PASSES");
+			}
+
+			int markIdx = reader.reset();
+			assert markIdx == 1;
 		}
 
 		if (parentVisitor != null) {
