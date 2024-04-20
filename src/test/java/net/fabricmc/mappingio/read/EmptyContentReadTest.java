@@ -68,7 +68,7 @@ public class EmptyContentReadTest {
 
 	@Test
 	public void emptyJamFile() throws Exception {
-		JamFileReader.read(new StringReader(""), tree);
+		JamFileReader.read(new StringReader(""), tree, errorSink);
 	}
 
 	@Test
@@ -78,11 +78,11 @@ public class EmptyContentReadTest {
 
 	@Test
 	public void emptyRecafSimpleFile() throws Exception {
-		RecafSimpleFileReader.read(new StringReader(""), tree);
+		RecafSimpleFileReader.read(new StringReader(""), tree, errorSink);
 	}
 
 	@Test
 	public void emptyJobfFile() throws Exception {
-		JobfFileReader.read(new StringReader(""), tree);
+		JobfFileReader.read(new StringReader(""), tree, errorSink);
 	}
 }

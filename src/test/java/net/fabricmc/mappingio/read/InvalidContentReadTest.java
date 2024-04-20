@@ -461,12 +461,14 @@ public class InvalidContentReadTest {
 		MappingFormat format = MappingFormat.RECAF_SIMPLE_FILE;
 		String prefix = "";
 
+		// Class
 		checkWorks(prefix, format);
 		checkError(prefix += "src", format);
 		checkError(prefix += " ", format);
 		checkWorks(prefix += "dst", format);
 		checkWorks(prefix += "\n", format);
 
+		// Field
 		checkError(prefix += "src", format);
 		checkError(prefix += ".", format);
 		checkError(prefix += "src", format);
@@ -476,11 +478,59 @@ public class InvalidContentReadTest {
 		checkWorks(prefix += "dst", format);
 		checkWorks(prefix += "\n", format);
 
+		// Method
 		checkError(prefix += "src", format);
 		checkError(prefix += ".", format);
 		checkError(prefix += "src", format);
 		checkError(prefix += "()V", format);
 		checkError(prefix += " ", format);
+		checkWorks(prefix += "dst", format);
+		checkWorks(prefix += "\n", format);
+	}
+
+	@Test
+	public void jobfFile() throws Exception {
+		MappingFormat format = MappingFormat.JOBF_FILE;
+		String prefix = "";
+
+		// Class
+		checkWorks(prefix, format);
+		checkError(prefix += "c", format);
+		checkError(prefix += " ", format);
+		checkError(prefix += "src", format);
+		checkWarning(prefix += " = ", format);
+		checkWorks(prefix += "dst", format);
+		checkWorks(prefix += "\n", format);
+
+		// Field
+		checkError(prefix += "f", format);
+		checkError(prefix += " ", format);
+		checkError(prefix += "src", format);
+		checkError(prefix += ".", format);
+		checkError(prefix += "src", format);
+		checkError(prefix += ":", format);
+		checkError(prefix += "I", format);
+		checkWarning(prefix += " = ", format);
+		checkWorks(prefix += "dst", format);
+		checkWorks(prefix += "\n", format);
+
+		// Method
+		checkError(prefix += "m", format);
+		checkError(prefix += " ", format);
+		checkError(prefix += "src", format);
+		checkError(prefix += ".", format);
+		checkError(prefix += "src", format);
+		checkError(prefix += "()", format);
+		checkError(prefix += "I", format);
+		checkWarning(prefix += " = ", format);
+		checkWorks(prefix += "dst", format);
+		checkWorks(prefix += "\n", format);
+
+		// Inner class
+		checkError(prefix += "c", format);
+		checkError(prefix += " ", format);
+		checkError(prefix += "src$src", format);
+		checkWarning(prefix += " = ", format);
 		checkWorks(prefix += "dst", format);
 		checkWorks(prefix += "\n", format);
 	}

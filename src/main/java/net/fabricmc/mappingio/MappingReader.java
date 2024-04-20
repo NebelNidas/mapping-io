@@ -355,7 +355,7 @@ public final class MappingReader {
 			RecafSimpleFileReader.read(reader, visitor, errorSink);
 			break;
 		case JOBF_FILE:
-			JobfFileReader.read(reader, visitor);
+			JobfFileReader.read(reader, visitor, errorSink);
 			break;
 		default:
 			throw new IllegalStateException();
