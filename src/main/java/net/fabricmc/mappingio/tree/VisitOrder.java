@@ -159,6 +159,14 @@ public final class VisitOrder {
 		return (a, b) -> compareShortFirst(a.getSrcName(), b.getSrcName());
 	}
 
+	public static <T extends MemberMappingView> Comparator<T> compareBySrcNameDescShortFirst() {
+		return (a, b) -> {
+			int cmp = compareShortFirst(a.getSrcName(), b.getSrcName());
+
+			return cmp != 0 ? cmp : compareShortFirst(a.getSrcDesc(), b.getSrcDesc());
+		};
+	}
+
 	public static int compare(@Nullable String a, @Nullable String b) {
 		if (a == null || b == null) return compareNullLast(a, b);
 
