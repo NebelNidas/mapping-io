@@ -18,7 +18,9 @@ package net.fabricmc.mappingio.i18n;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -26,6 +28,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.jetbrains.annotations.ApiStatus;
 
@@ -40,21 +44,41 @@ public class I18n {
 
 	public static String translate(String key, Locale locale) {
 		try {
-			return messageBundles.getOrDefault(locale, load(locale)).getString(key);
+			return load(locale).getString(key);
 		} catch (Exception e) {
-			System.err.println("Exception while translating key " + key + " to locale " + locale.toLanguageTag() + ": " + e.getMessage());
+			System.err.println("Exception while translating key " + key + " to locale " + locale.toLanguageTag() + ": " + getStackTrace(e));
 			if (locale == fallbackLocale) return key;
 
 			try {
-				return messageBundles.getOrDefault(fallbackLocale, load(fallbackLocale)).getString(key);
+				return load(fallbackLocale).getString(key);
 			} catch (Exception e2) {
-				System.err.println("Exception while translating key " + key + " to fallback locale: " + e2.getMessage());
+				System.err.println("Exception while translating key " + key + " to fallback locale: " + getStackTrace(e2));
 				return key;
 			}
 		}
 	}
 
 	private static ResourceBundle load(Locale locale) {
+		ResourceBundle bundle = messageBundles.get(locale);
+
+		if (bundle != null) {
+			return bundle;
+		}
+
+		bundlesLock.lock();
+
+		try {
+			if ((bundle = messageBundles.get(locale)) != null) {
+				return bundle;
+			}
+
+			return load0(locale);
+		} finally {
+			bundlesLock.unlock();
+		}
+	}
+
+	private static ResourceBundle load0(Locale locale) {
 		ResourceBundle resBundle;
 		String resName = String.format("/mappingio/lang/%s.properties", locale.toLanguageTag().replace('-', '_').toLowerCase(Locale.ROOT));
 		URL resUrl = I18n.class.getResource(resName);
@@ -72,6 +96,16 @@ public class I18n {
 		}
 	}
 
+	private static String getStackTrace(Throwable t) {
+		if (t == null) return null;
+
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		t.printStackTrace(pw);
+		return sw.toString();
+	}
+
+	private static final Lock bundlesLock = new ReentrantLock();
 	private static final Locale fallbackLocale = Locale.US;
 	private static final Map<Locale, ResourceBundle> messageBundles = new HashMap<>();
 }
