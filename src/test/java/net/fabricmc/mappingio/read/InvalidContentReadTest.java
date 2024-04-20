@@ -349,6 +349,38 @@ public class InvalidContentReadTest {
 		checkWorks(prefix += "dst", format);
 	}
 
+	@Test
+	public void csrgFile() throws Exception {
+		MappingFormat format = MappingFormat.CSRG_FILE;
+
+		checkCsrgLine(MappedElementKind.CLASS, format);
+		checkCsrgLine(MappedElementKind.FIELD, format);
+		checkCsrgLine(MappedElementKind.METHOD, format);
+	}
+
+	private void checkCsrgLine(MappedElementKind kind, MappingFormat format) throws Exception {
+		String prefix = "srcCls srcFld dstField\n"; // So the format is detected as CSRG
+		checkWorks(prefix, format);
+
+		checkError(prefix += "src", format);
+		checkWarning(prefix += " ", format);
+
+		if (kind == MappedElementKind.FIELD || kind == MappedElementKind.METHOD) {
+			checkWorks(prefix += "src", format); // detected as <srcClsName> <dstClsName>
+			prefix += " ";
+
+			if (kind == MappedElementKind.FIELD) {
+				checkError(prefix, format);
+			} else {
+				checkError(prefix, format);
+				checkWorks(prefix += "()V", format); // detected as <srcClassName> <srcFieldName> <dstFieldName>
+				checkWarning(prefix + " ", format);
+			}
+		}
+
+		checkWorks(prefix += "dst", format);
+	}
+
 	private void checkThrows(String fileContent, MappingFormat format) throws Exception {
 		assertThrows(IOException.class, () -> checkWorks(fileContent, format));
 	}
