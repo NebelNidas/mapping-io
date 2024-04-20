@@ -38,7 +38,7 @@ public class I18nTest {
 
 	@BeforeAll
 	public static void init() throws Exception {
-		URL i18nUrl = I18nTest.class.getResource("/i18n/");
+		URL i18nUrl = I18nTest.class.getResource("/mappingio/lang/");
 		Path path = Paths.get(i18nUrl.toURI());
 
 		supportedLocales = Files.walk(path)

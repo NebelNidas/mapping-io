@@ -56,7 +56,7 @@ public class I18n {
 
 	private static ResourceBundle load(Locale locale) {
 		ResourceBundle resBundle;
-		String resName = String.format("/i18n/%s.properties", locale.toLanguageTag().replace('-', '_').toLowerCase(Locale.ROOT));
+		String resName = String.format("/mappingio/lang/%s.properties", locale.toLanguageTag().replace('-', '_').toLowerCase(Locale.ROOT));
 		URL resUrl = I18n.class.getResource(resName);
 
 		if (resUrl == null) {
