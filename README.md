@@ -79,8 +79,8 @@ Legend:
 | ------------------------------------------------- | ---------- | -------- | -------- |
 | Multi-namespace support                           | ✔         | ❌       | ❌       |
 | Built-in adapters for common operations           | ✔         | ❌       | ❌       |
-| More memory-efficient alternative API             | ✔         | ❌       | ❌       |
+| More memory-efficient streaming API               | ✔         | ❌       | ❌       |
 | Error recovery                                    | 🚧        | ❌       | ❌       |
 | Arbitrary metadata                                | 🚧        | ❌       | ❌       |
-| Programmatic querying of format capabilities      | 🚧        | ❌       | ❌       |
+| Programmatic querying of format capabilities      | ✔         | ❌       | ❌       |
 | Validation and reporting of non-standard contents | 🚧        | ❌       | ❌       |
