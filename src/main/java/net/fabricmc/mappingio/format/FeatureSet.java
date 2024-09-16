@@ -30,13 +30,11 @@ public interface FeatureSet {
 	boolean hasFileComments();
 
 	default boolean supportsPackages() {
-		return packages().srcNames() != FeaturePresence.ABSENT
-				|| packages().dstNames() != FeaturePresence.ABSENT;
+		return packages().srcNames() != FeaturePresence.ABSENT;
 	}
 
 	default boolean supportsClasses() {
-		return classes().srcNames() != FeaturePresence.ABSENT
-				|| classes().dstNames() != FeaturePresence.ABSENT;
+		return classes().srcNames() != FeaturePresence.ABSENT;
 	}
 
 	default boolean supportsFields() {

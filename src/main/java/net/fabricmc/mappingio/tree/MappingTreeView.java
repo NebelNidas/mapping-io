@@ -85,6 +85,20 @@ public interface MappingTreeView {
 	 */
 	List<? extends MetadataEntryView> getMetadata(String key);
 
+	Collection<? extends PackageMappingView> getPackages();
+	@Nullable
+	PackageMappingView getPackage(String srcName);
+	@Nullable
+	default PackageMappingView getPackage(String name, int namespace) {
+		if (namespace < 0) return getPackage(name);
+
+		for (PackageMappingView pkg : getPackages()) {
+			if (name.equals(pkg.getDstName(namespace))) return pkg;
+		}
+
+		return null;
+	}
+
 	Collection<? extends ClassMappingView> getClasses();
 	@Nullable
 	ClassMappingView getClass(String srcName);
@@ -137,6 +151,23 @@ public interface MappingTreeView {
 	}
 
 	void accept(MappingVisitor visitor, VisitOrder order) throws IOException;
+
+	default String mapPackageName(String name, int namespace) {
+		return mapPackageName(name, SRC_NAMESPACE_ID, namespace);
+	}
+
+	default String mapPackageName(String name, int srcNamespace, int dstNamespace) {
+		assert name.indexOf('.') < 0;
+
+		if (srcNamespace == dstNamespace) return name;
+
+		PackageMappingView pkg = getPackage(name, srcNamespace);
+		if (pkg == null) return name;
+
+		String ret = pkg.getName(dstNamespace);
+
+		return ret != null ? ret : name;
+	}
 
 	default String mapClassName(String name, int namespace) {
 		return mapClassName(name, SRC_NAMESPACE_ID, namespace);
@@ -246,6 +277,8 @@ public interface MappingTreeView {
 		@Nullable
 		String getComment();
 	}
+
+	interface PackageMappingView extends ElementMappingView { }
 
 	interface ClassMappingView extends ElementMappingView {
 		Collection<? extends FieldMappingView> getFields();

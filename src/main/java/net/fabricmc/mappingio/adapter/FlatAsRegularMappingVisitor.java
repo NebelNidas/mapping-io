@@ -64,10 +64,11 @@ public final class FlatAsRegularMappingVisitor implements MappingVisitor {
 		Set<MappingFlag> flags = next.getFlags();
 
 		if (flags.contains(MappingFlag.NEEDS_ELEMENT_UNIQUENESS)) {
+			dstPackageNames = new String[count];
 			dstClassNames = new String[count];
 			dstMemberNames = new String[count];
 		} else {
-			dstClassNames = dstMemberNames = null;
+			dstPackageNames = dstClassNames = dstMemberNames = null;
 		}
 
 		dstMemberDescs = flags.contains(MappingFlag.NEEDS_DST_FIELD_DESC) || flags.contains(MappingFlag.NEEDS_DST_METHOD_DESC) ? new String[count] : null;
@@ -81,6 +82,16 @@ public final class FlatAsRegularMappingVisitor implements MappingVisitor {
 	@Override
 	public boolean visitContent() throws IOException {
 		return next.visitContent();
+	}
+
+	@Override
+	public boolean visitPackage(String srcName) throws IOException {
+		this.srcPkgName = srcName;
+
+		Arrays.fill(dstNames, null);
+		if (dstPackageNames != null) Arrays.fill(dstPackageNames, null);
+
+		return true;
 	}
 
 	@Override
@@ -161,6 +172,10 @@ public final class FlatAsRegularMappingVisitor implements MappingVisitor {
 		boolean relay;
 
 		switch (targetKind) {
+		case PACKAGE:
+			relay = next.visitPackage(srcPkgName, dstNames);
+			if (relay && dstPackageNames != null) System.arraycopy(dstNames, 0, dstPackageNames, 0, dstNames.length);
+			break;
 		case CLASS:
 			relay = next.visitClass(srcClsName, dstNames);
 			if (relay && dstClassNames != null) System.arraycopy(dstNames, 0, dstClassNames, 0, dstNames.length);
@@ -193,6 +208,9 @@ public final class FlatAsRegularMappingVisitor implements MappingVisitor {
 	@Override
 	public void visitComment(MappedElementKind targetKind, String comment) throws IOException {
 		switch (targetKind) {
+		case PACKAGE:
+			next.visitPackageComment(srcPkgName, dstNames, comment);
+			break;
 		case CLASS:
 			next.visitClassComment(srcClsName, dstClassNames, comment);
 			break;
@@ -217,12 +235,14 @@ public final class FlatAsRegularMappingVisitor implements MappingVisitor {
 
 	private final FlatMappingVisitor next;
 
+	private String srcPkgName;
 	private String srcClsName;
 	private String srcMemberName;
 	private String srcMemberDesc;
 	private String srcMemberSubName;
 	private int argIdx, lvIndex, startOpIdx, endOpIdx;
 	private String[] dstNames;
+	private String[] dstPackageNames;
 	private String[] dstClassNames;
 	private String[] dstMemberNames;
 	private String[] dstMemberDescs;

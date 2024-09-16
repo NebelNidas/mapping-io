@@ -116,6 +116,13 @@ public final class MappingNsCompleter extends ForwardingMappingVisitor {
 	}
 
 	@Override
+	public boolean visitPackage(String srcName) throws IOException {
+		this.srcName = srcName;
+
+		return next.visitPackage(srcName);
+	}
+
+	@Override
 	public boolean visitClass(String srcName) throws IOException {
 		this.srcName = srcName;
 

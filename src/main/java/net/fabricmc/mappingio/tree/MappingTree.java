@@ -83,6 +83,34 @@ public interface MappingTree extends MappingTreeView {
 	boolean removeMetadata(String key);
 
 	@Override
+	Collection<? extends PackageMapping> getPackages();
+	@Override
+	@Nullable
+	PackageMapping getPackage(String srcName);
+
+	@Override
+	@Nullable
+	default PackageMapping getPackage(String name, int namespace) {
+		return (PackageMapping) MappingTreeView.super.getPackage(name, namespace);
+	}
+
+	/**
+	 * Merges a package mapping into the tree.
+	 *
+	 * @return The {@link PackageMapping} instance present in the tree after the merge has occurred.
+	 * May or may not be the passed instance.
+	 */
+	PackageMapping addPackage(PackageMapping pkg);
+
+	/**
+	 * Removes a package mapping from the tree.
+	 *
+	 * @return The removed package mapping, if any.
+	 */
+	@Nullable
+	PackageMapping removePackage(String srcName);
+
+	@Override
 	Collection<? extends ClassMapping> getClasses();
 	@Override
 	@Nullable
@@ -144,6 +172,8 @@ public interface MappingTree extends MappingTreeView {
 		void setDstName(String name, int namespace);
 		void setComment(String comment);
 	}
+
+	interface PackageMapping extends ElementMapping, PackageMappingView { }
 
 	interface ClassMapping extends ElementMapping, ClassMappingView {
 		@Override

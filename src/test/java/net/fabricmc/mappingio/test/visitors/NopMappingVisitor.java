@@ -44,6 +44,11 @@ public class NopMappingVisitor implements MappingVisitor {
 	}
 
 	@Override
+	public boolean visitPackage(String srcName) throws IOException {
+		return visitSubVisitors;
+	}
+
+	@Override
 	public boolean visitClass(String srcName) throws IOException {
 		return visitSubVisitors;
 	}

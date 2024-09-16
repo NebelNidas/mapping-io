@@ -48,6 +48,7 @@ public class VisitOrderVerifyingVisitor extends ForwardingMappingVisitor {
 		visitedNamespaces = false;
 		visitedMetadata = false;
 		visitedContent = false;
+		visitedPackage = false;
 		visitedClass = false;
 		visitedField = false;
 		visitedMethod = false;
@@ -103,6 +104,7 @@ public class VisitOrderVerifyingVisitor extends ForwardingMappingVisitor {
 		assertNamespacesVisited();
 
 		visitedMetadata = true;
+		visitedPackage = false;
 		visitedClass = false;
 		visitedField = false;
 		visitedMethod = false;
@@ -121,6 +123,29 @@ public class VisitOrderVerifyingVisitor extends ForwardingMappingVisitor {
 	}
 
 	@Override
+	public boolean visitPackage(String srcName) throws IOException {
+		MappedElementKind elementKind = MappedElementKind.PACKAGE;
+		SrcInfo srcInfo = new SrcInfo().srcName(srcName);
+
+		assertContentVisited();
+		assertLastElementContentVisited();
+		resetLastSrcInfoDownTo(elementKind.level);
+		assertNewSrcInfo(elementKind, srcInfo);
+
+		visitedPackage = true;
+		visitedClass = false;
+		visitedField = false;
+		visitedMethod = false;
+		visitedMethodArg = false;
+		visitedMethodVar = false;
+		lastVisitedElement = elementKind;
+		lastSrcInfo.put(elementKind, srcInfo);
+		resetVisitedElementContentDownTo(elementKind.level);
+
+		return visitedLastElement = super.visitPackage(srcName);
+	}
+
+	@Override
 	public boolean visitClass(String srcName) throws IOException {
 		MappedElementKind elementKind = MappedElementKind.CLASS;
 		SrcInfo srcInfo = new SrcInfo().srcName(srcName);
@@ -130,6 +155,7 @@ public class VisitOrderVerifyingVisitor extends ForwardingMappingVisitor {
 		resetLastSrcInfoDownTo(elementKind.level);
 		assertNewSrcInfo(elementKind, srcInfo);
 
+		visitedPackage = false;
 		visitedClass = true;
 		visitedField = false;
 		visitedMethod = false;
@@ -450,6 +476,7 @@ public class VisitOrderVerifyingVisitor extends ForwardingMappingVisitor {
 	private boolean visitedNamespaces;
 	private boolean visitedMetadata;
 	private boolean visitedContent;
+	private boolean visitedPackage;
 	private boolean visitedClass;
 	private boolean visitedField;
 	private boolean visitedMethod;

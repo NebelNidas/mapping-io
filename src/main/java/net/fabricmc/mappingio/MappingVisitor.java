@@ -28,7 +28,8 @@ import org.jetbrains.annotations.Nullable;
  * <p>The visitation order is as follows (omitting visit prefixes for brevity, lowercase for cross-references):
  * <ul><li>overall: header -> content -> End -> overall
  * <li>header: Header -> Namespaces [-> Metadata]*
- * <li>content: Content [-> class|Metadata]*
+ * <li>content: Content [-> package|class|Metadata]*
+ * <li>package: Package [-> DstName]* -> ElementContent*
  * <li>class: Class [-> DstName]* -> ElementContent [-> field|method|Comment]*
  * <li>field: Field [-> DstName|DstDesc]* -> ElementContent [-> Comment]
  * <li>method: Method [-> DstName|DstDesc]* -> ElementContent [-> arg|var|Comment]*
@@ -83,6 +84,18 @@ public interface MappingVisitor {
 	 */
 	default boolean visitContent() throws IOException {
 		return true;
+	}
+
+	/**
+	 * Visit a package.
+	 *
+	 * @param srcName The package path, with slashes instead of dots, and no trailing slash.
+	 * An empty string represents the default package.
+	 * @return Whether the package's content should be visited too.
+	 */
+	// TODO: Un-"default" in the next breaking release
+	default boolean visitPackage(String srcName) throws IOException {
+		return false;
 	}
 
 	/**

@@ -68,13 +68,17 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 			addMetadata(entry);
 		}
 
+		for (PackageMapping pkg : src.getPackages()) {
+			addPackage(pkg);
+		}
+
 		for (ClassMapping cls : src.getClasses()) {
 			addClass(cls);
 		}
 	}
 
 	/**
-	 * Whether to index classes by their destination names, in addition to their source names.
+	 * Whether to index packages and classes by their destination names, in addition to their source names.
 	 *
 	 * <p>Trades higher memory consumption for faster lookups by destination name.
 	 */
@@ -83,12 +87,30 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 		if (indexByDstNames == this.indexByDstNames) return;
 
 		if (!indexByDstNames) {
+			packagesByDstNames = null;
 			classesByDstNames = null;
 		} else if (dstNamespaces != null) {
+			initPackagesByDstNames();
 			initClassesByDstNames();
 		}
 
 		this.indexByDstNames = indexByDstNames;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void initPackagesByDstNames() {
+		packagesByDstNames = new Map[dstNamespaces.size()];
+
+		for (int i = 0; i < packagesByDstNames.length; i++) {
+			packagesByDstNames[i] = new HashMap<String, PackageEntry>(packagesBySrcName.size());
+		}
+
+		for (PackageEntry pkg : packagesBySrcName.values()) {
+			for (int i = 0; i < pkg.dstNames.length; i++) {
+				String dstName = pkg.dstNames[i];
+				if (dstName != null) packagesByDstNames[i].put(dstName, pkg);
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -159,7 +181,7 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 	public List<String> setDstNamespaces(List<String> namespaces) {
 		assertNotInVisitPass();
 
-		if (!classesBySrcName.isEmpty()) { // classes present, update existing dstNames
+		if (!packagesBySrcName.isEmpty() || !classesBySrcName.isEmpty()) { // packages or classes present, update existing dstNames
 			int newSize = namespaces.size();
 			int[] nameMap = new int[newSize];
 			Set<String> processedNamespaces = new HashSet<>(newSize);
@@ -211,6 +233,7 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 		dstNamespaces = namespaces;
 
 		if (indexByDstNames) {
+			initPackagesByDstNames();
 			initClassesByDstNames();
 		}
 
@@ -218,6 +241,10 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 	}
 
 	private void resizeDstNames(int newSize) {
+		for (PackageEntry pkg : packagesBySrcName.values()) {
+			pkg.resizeDstNames(newSize);
+		}
+
 		for (ClassEntry cls : classesBySrcName.values()) {
 			cls.resizeDstNames(newSize);
 
@@ -240,6 +267,10 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 	}
 
 	private void updateDstNames(int[] nameMap) {
+		for (PackageEntry pkg : packagesBySrcName.values()) {
+			pkg.updateDstNames(nameMap);
+		}
+
 		for (ClassEntry cls : classesBySrcName.values()) {
 			cls.updateDstNames(nameMap);
 
@@ -259,6 +290,13 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 				}
 			}
 		}
+	}
+
+	private int getSrcNsEquivalent(ElementMapping mapping) {
+		int ret = mapping.getTree().getNamespaceId(srcNamespace);
+		if (ret == NULL_NAMESPACE_ID) throw new UnsupportedOperationException("can't find source namespace in referenced mapping tree");
+
+		return ret;
 	}
 
 	@Override
@@ -281,6 +319,64 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 	@Override
 	public boolean removeMetadata(String key) {
 		return metadata.removeIf(entry -> entry.getKey().equals(key));
+	}
+
+	@Override
+	public Collection<? extends PackageMapping> getPackages() {
+		return packagesView;
+	}
+
+	@Override
+	@Nullable
+	public PackageMapping getPackage(String srcName) {
+		return packagesBySrcName.get(srcName);
+	}
+
+	@Override
+	@Nullable
+	public PackageMapping getPackage(String name, int namespace) {
+		if (namespace < 0 || !indexByDstNames) {
+			return VisitableMappingTree.super.getPackage(name, namespace);
+		} else {
+			return packagesByDstNames[namespace].get(name);
+		}
+	}
+
+	@Override
+	public PackageMapping addPackage(PackageMapping pkg) {
+		assertNotInVisitPass();
+		PackageEntry entry = pkg instanceof PackageEntry && pkg.getTree() == this ? (PackageEntry) pkg : new PackageEntry(this, pkg, getSrcNsEquivalent(pkg));
+		PackageEntry ret = packagesBySrcName.putIfAbsent(pkg.getSrcName(), entry);
+
+		if (ret != null) {
+			ret.copyFrom(entry, true);
+			entry = ret;
+		}
+
+		if (indexByDstNames) {
+			for (int i = 0; i < entry.dstNames.length; i++) {
+				String dstName = entry.dstNames[i];
+				if (dstName != null) packagesByDstNames[i].put(dstName, entry);
+			}
+		}
+
+		return entry;
+	}
+
+	@Override
+	@Nullable
+	public PackageMapping removePackage(String srcName) {
+		assertNotInVisitPass();
+		PackageEntry ret = packagesBySrcName.remove(srcName);
+
+		if (ret != null && indexByDstNames) {
+			for (int i = 0; i < ret.dstNames.length; i++) {
+				String dstName = ret.dstNames[i];
+				if (dstName != null) packagesByDstNames[i].remove(dstName);
+			}
+		}
+
+		return ret;
 	}
 
 	@Override
@@ -323,13 +419,6 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 		}
 
 		return entry;
-	}
-
-	private int getSrcNsEquivalent(ElementMapping mapping) {
-		int ret = mapping.getTree().getNamespaceId(srcNamespace);
-		if (ret == NULL_NAMESPACE_ID) throw new UnsupportedOperationException("can't find source namespace in referenced mapping tree");
-
-		return ret;
 	}
 
 	@Override
@@ -381,9 +470,22 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 				Set<MappingFlag> flags = visitor.getFlags();
 				boolean supplyFieldDstDescs = flags.contains(MappingFlag.NEEDS_DST_FIELD_DESC);
 				boolean supplyMethodDstDescs = flags.contains(MappingFlag.NEEDS_DST_METHOD_DESC);
+				boolean classesFirst = order.isClassesFirst();
 
-				for (ClassEntry cls : order.sortClasses(classesBySrcName.values())) {
-					cls.accept(visitor, order, supplyFieldDstDescs, supplyMethodDstDescs);
+				if (classesFirst) {
+					for (ClassEntry cls : order.sortClasses(classesBySrcName.values())) {
+						cls.accept(visitor, order, supplyFieldDstDescs, supplyMethodDstDescs);
+					}
+				}
+
+				for (PackageEntry pkg : order.sortPackages(packagesBySrcName.values())) {
+					pkg.accept(visitor, order);
+				}
+
+				if (!classesFirst) {
+					for (ClassEntry cls : order.sortClasses(classesBySrcName.values())) {
+						cls.accept(visitor, order, supplyFieldDstDescs, supplyMethodDstDescs);
+					}
 				}
 			}
 		} while (!visitor.visitEnd());
@@ -397,6 +499,7 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 		currentEntry = null;
 		currentClass = null;
 		currentMethod = null;
+		pendingPackages = null;
 		pendingClasses = null;
 		pendingMembers = null;
 	}
@@ -448,7 +551,12 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 				resizeDstNames(newSize);
 
 				if (indexByDstNames) {
+					packagesByDstNames = Arrays.copyOf(packagesByDstNames, newSize);
 					classesByDstNames = Arrays.copyOf(classesByDstNames, newSize);
+
+					for (int i = newSize - newDstNamespaces; i < packagesByDstNames.length; i++) {
+						packagesByDstNames[i] = new HashMap<String, PackageEntry>(packagesBySrcName.size());
+					}
 
 					for (int i = newSize - newDstNamespaces; i < classesByDstNames.length; i++) {
 						classesByDstNames[i] = new HashMap<>(classesBySrcName.size());
@@ -469,6 +577,7 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 			}
 
 			if (indexByDstNames) {
+				initPackagesByDstNames();
 				initClassesByDstNames();
 			}
 		}
@@ -478,6 +587,26 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 	public void visitMetadata(String key, @Nullable String value) {
 		MetadataEntryImpl entry = new MetadataEntryImpl(key, value);
 		metadata.add(entry);
+	}
+
+	@Override
+	public boolean visitPackage(String srcName) {
+		currentClass = null;
+
+		PackageEntry pkg = (PackageEntry) getPackage(srcName, srcNsMap);
+
+		if (pkg == null) {
+			if (srcNsMap >= 0) { // tree-side srcName unknown
+				pkg = queuePendingPackage(srcName);
+			} else {
+				pkg = new PackageEntry(this, srcName);
+				packagesBySrcName.put(srcName, pkg);
+			}
+		}
+
+		currentEntry = pkg;
+
+		return true;
 	}
 
 	@Override
@@ -556,6 +685,21 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 		return true;
 	}
 
+	private PackageEntry queuePendingPackage(String name) {
+		if (pendingPackages == null) pendingPackages = new HashMap<>();
+		PackageEntry pkg = pendingPackages.get(name);
+
+		if (pkg == null) {
+			pkg = new PackageEntry(this, null);
+			pendingPackages.put(name, pkg);
+		}
+
+		assert srcNsMap >= 0;
+		pkg.setDstNameInternal(name, srcNsMap);
+
+		return pkg;
+	}
+
 	private ClassEntry queuePendingClass(String name) {
 		if (pendingClasses == null) pendingClasses = new HashMap<>();
 		ClassEntry cls = pendingClasses.get(name);
@@ -590,6 +734,21 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 		member.setDstNameInternal(name, srcNsMap);
 
 		return member;
+	}
+
+	private void addPendingPackage(PackageEntry pkg) {
+		if (pkg.isSrcNameMissing()) {
+			return;
+		}
+
+		String srcName = pkg.getSrcName();
+		PackageEntry existing = packagesBySrcName.get(srcName);
+
+		if (existing == null) {
+			packagesBySrcName.put(srcName, pkg);
+		} else { // copy remaining data
+			existing.copyFrom(pkg, true);
+		}
 	}
 
 	private void addPendingClass(ClassEntry cls) {
@@ -698,6 +857,15 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 	@Override
 	public boolean visitEnd() {
 		// TODO: Don't discard pending elements which are still missing their tree-side src names, upcoming visit passes might provide them
+
+		if (pendingPackages != null) {
+			for (PackageEntry pkg : pendingPackages.values()) {
+				addPendingPackage(pkg);
+			}
+
+			pendingPackages = null;
+		}
+
 		if (pendingClasses != null) {
 			for (ClassEntry cls : pendingClasses.values()) {
 				addPendingClass(cls);
@@ -782,8 +950,8 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 			if (name.equals(currentEntry.getSrcNameUnchecked())) return;
 
 			switch (currentEntry.getKind()) {
+			case PACKAGE:
 			case CLASS:
-				assert currentClass == currentEntry;
 			case FIELD:
 			case METHOD:
 				if (currentEntry.isSrcNameMissing()) {
@@ -863,6 +1031,11 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 		}
 
 		public abstract MappedElementKind getKind();
+
+		@Override
+		public MappingTree getTree() {
+			return tree;
+		}
 
 		final boolean isSrcNameMissing() {
 			return srcName == null;
@@ -983,11 +1156,60 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 			}
 		}
 
+		@Override
+		public abstract String toString();
+
 		private final boolean missingSrcNameAllowed = getKind().level > MappedElementKind.METHOD.level; // args and vars
 		protected final MemoryMappingTree tree;
 		private String srcName;
 		protected String[] dstNames;
 		protected String comment;
+	}
+
+	static final class PackageEntry extends Entry<PackageEntry> implements PackageMapping {
+		PackageEntry(MemoryMappingTree tree, String srcName) {
+			super(tree, srcName);
+		}
+
+		PackageEntry(MemoryMappingTree tree, PackageMapping src, int srcNsEquivalent) {
+			super(tree, src, srcNsEquivalent);
+		}
+
+		@Override
+		public MappedElementKind getKind() {
+			return MappedElementKind.PACKAGE;
+		}
+
+		@Override
+		void setDstNameInternal(String name, int namespace) {
+			if (tree.indexByDstNames) {
+				String oldName = dstNames[namespace];
+
+				if (!Objects.equals(name, oldName)) {
+					Map<String, PackageEntry> map = tree.packagesByDstNames[namespace];
+					if (oldName != null) map.remove(oldName);
+
+					if (name != null) {
+						map.put(name, this);
+					} else {
+						map.remove(oldName);
+					}
+				}
+			}
+
+			super.setDstNameInternal(name, namespace);
+		}
+
+		void accept(MappingVisitor visitor, VisitOrder order) throws IOException {
+			if (visitor.visitPackage(getSrcName())) {
+				acceptElement(visitor, null);
+			}
+		}
+
+		@Override
+		public String toString() {
+			return getSrcNameUnchecked();
+		}
 	}
 
 	static final class ClassEntry extends Entry<ClassEntry> implements ClassMapping {
@@ -1010,11 +1232,6 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 		@Override
 		public MappedElementKind getKind() {
 			return MappedElementKind.CLASS;
-		}
-
-		@Override
-		public MemoryMappingTree getTree() {
-			return tree;
 		}
 
 		@Override
@@ -1334,11 +1551,6 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 			this.owner = owner;
 			this.srcDesc = src.getDesc(srcNsEquivalent);
 			this.key = new MemberKey(getSrcName(), srcDesc);
-		}
-
-		@Override
-		public MappingTree getTree() {
-			return owner.tree;
 		}
 
 		@Override
@@ -1777,11 +1989,6 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 		}
 
 		@Override
-		public MappingTree getTree() {
-			return method.owner.tree;
-		}
-
-		@Override
 		public MappedElementKind getKind() {
 			return MappedElementKind.METHOD_ARG;
 		}
@@ -1873,11 +2080,6 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 			this.lvIndex = src.getLvIndex();
 			this.startOpIdx = src.getStartOpIdx();
 			this.endOpIdx = src.getEndOpIdx();
-		}
-
-		@Override
-		public MappingTree getTree() {
-			return method.owner.tree;
 		}
 
 		@Override
@@ -2103,8 +2305,11 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 	private String srcNamespace;
 	private List<String> dstNamespaces = Collections.emptyList();
 	private final List<MetadataEntry> metadata = new ArrayList<>();
+	private final Map<String, PackageEntry> packagesBySrcName = new LinkedHashMap<>();
 	private final Map<String, ClassEntry> classesBySrcName = new LinkedHashMap<>();
+	private final Collection<PackageEntry> packagesView = Collections.unmodifiableCollection(packagesBySrcName.values());
 	private final Collection<ClassEntry> classesView = Collections.unmodifiableCollection(classesBySrcName.values());
+	private Map<String, PackageEntry>[] packagesByDstNames;
 	private Map<String, ClassEntry>[] classesByDstNames;
 
 	private HierarchyInfoProvider<?> hierarchyInfo;
@@ -2115,6 +2320,8 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 	private Entry<?> currentEntry;
 	private ClassEntry currentClass;
 	private MethodEntry currentMethod;
+	/** originalSrcName -> pkgEntry. */
+	private Map<String, PackageEntry> pendingPackages;
 	/** originalSrcName -> clsEntry. */
 	private Map<String, ClassEntry> pendingClasses;
 	private Map<GlobalMemberKey, MemberEntry<?>> pendingMembers;

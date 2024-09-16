@@ -128,7 +128,7 @@ public final class TsrgFileReader {
 					reader.discardMark();
 					String[] parts = line.split("((?<= )|(?= ))"); // Split on spaces, but keep them
 
-					if (format != MappingFormat.TSRG_2_FILE && parts.length >= 4 && !parts[3].startsWith("#")) { // CSRG
+					if (format != MappingFormat.TSRG_2_FILE && parts.length >= 4 && !parts[3].startsWith("#")) { // CSRG member
 						format = MappingFormat.CSRG_FILE;
 						String clsName = parts[0];
 						if (clsName.isEmpty()) throw new IOException("missing class-name-a in line "+reader.getLineNumber());
@@ -173,14 +173,19 @@ public final class TsrgFileReader {
 					}
 
 					String srcName = reader.nextCol();
-					if (srcName == null || srcName.endsWith("/")) continue;
-					if (srcName.isEmpty()) throw new IOException("missing class-name-a in line "+reader.getLineNumber());
+					if (srcName == null || srcName.isEmpty()) throw new IOException("missing package-/class-name-a in line "+reader.getLineNumber());
 
-					lastClass = srcName;
-					visitLastClass = visitor.visitClass(srcName);
+					if (srcName.endsWith("/")) { // package
+						if (visitor.visitPackage(srcName)) {
+							readElement(reader, MappedElementKind.PACKAGE, 0, dstNsCount, visitor);
+						}
+					} else { // class
+						lastClass = srcName;
+						visitLastClass = visitor.visitClass(srcName);
 
-					if (visitLastClass) {
-						visitLastClass = readClass(reader, format == MappingFormat.TSRG_2_FILE, dstNsCount, nameTmp, visitor);
+						if (visitLastClass) {
+							visitLastClass = readClass(reader, format == MappingFormat.TSRG_2_FILE, dstNsCount, nameTmp, visitor);
+						}
 					}
 				} while (reader.nextLine(0));
 			}
