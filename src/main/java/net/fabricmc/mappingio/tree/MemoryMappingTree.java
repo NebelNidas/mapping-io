@@ -134,8 +134,8 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 
 		if (dstNamespaces.contains(namespace)) {
 			throw new UnsupportedOperationException(String.format(
-					"Can't use name \"%s\" for the source namespace, as it's already in use by one of the destination namespaces %s.\n"
-					+ "If a source namespace shuffle was the desired outcome, please resort to a %s instead; %s doesn't support this operation natively yet.",
+					"Can't use name \"%s\" for the source namespace, as it's already in use by one of the destination namespaces %s."
+					+ " If a source namespace shuffle was the desired outcome, please resort to a %s instead; %s doesn't support this operation natively yet.",
 					namespace, dstNamespaces, MappingSourceNsSwitch.class.getSimpleName(), getClass().getSimpleName()));
 		}
 
@@ -170,8 +170,8 @@ public final class MemoryMappingTree implements VisitableMappingTree {
 
 				if (newNs.equals(srcNamespace)) {
 					throw new UnsupportedOperationException(String.format(
-							"Can't use name \"%s\" for destination namespace %s, as it's already in use by the source namespace.\n"
-							+ "If a source namespace shuffle was the desired outcome, please resort to a %s instead; %s doesn't support this operation natively yet.",
+							"Can't use name \"%s\" for destination namespace %s, as it's already in use by the source namespace."
+							+ " If a source namespace shuffle was the desired outcome, please resort to a %s instead; %s doesn't support this operation natively yet.",
 							newNs, i, MappingSourceNsSwitch.class.getSimpleName(), getClass().getSimpleName()));
 				} else {
 					int oldNsIdx = dstNamespaces.indexOf(newNs);
