@@ -53,7 +53,7 @@ public final class JobfFileWriter implements MappingWriter {
 
 	@Override
 	public boolean visitClass(String srcName) throws IOException {
-		classSrcName = srcName.replace('/', '.');
+		classSrcName = srcName;
 
 		return true;
 	}
@@ -99,6 +99,15 @@ public final class JobfFileWriter implements MappingWriter {
 		if (dstName == null) return isClass;
 
 		if ((isClass)) {
+			int srcNameLastSep = classSrcName.lastIndexOf('/');
+			int dstNameLastSep = dstName.lastIndexOf('/');
+			String srcPkg = classSrcName.substring(0, srcNameLastSep + 1);
+			String dstPkg = dstName.substring(0, dstNameLastSep + 1);
+
+			classSrcName = classSrcName.replace('/', '.');
+			if (!srcPkg.equals(dstPkg)) return true; // JOBF doesn't support renaming into a different package
+
+			dstName = dstName.substring(dstNameLastSep + 1);
 			write("c ");
 		} else if ((isField = targetKind == MappedElementKind.FIELD)
 				|| targetKind == MappedElementKind.METHOD) {
