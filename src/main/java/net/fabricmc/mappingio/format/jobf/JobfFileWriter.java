@@ -54,6 +54,7 @@ public final class JobfFileWriter implements MappingWriter {
 	@Override
 	public boolean visitClass(String srcName) throws IOException {
 		classSrcName = srcName;
+		dstName = null;
 
 		return true;
 	}
@@ -62,6 +63,7 @@ public final class JobfFileWriter implements MappingWriter {
 	public boolean visitField(String srcName, @Nullable String srcDesc) throws IOException {
 		memberSrcName = srcName;
 		memberSrcDesc = srcDesc;
+		dstName = null;
 
 		return true;
 	}
@@ -70,6 +72,7 @@ public final class JobfFileWriter implements MappingWriter {
 	public boolean visitMethod(String srcName, @Nullable String srcDesc) throws IOException {
 		memberSrcName = srcName;
 		memberSrcDesc = srcDesc;
+		dstName = null;
 
 		return true;
 	}
@@ -132,7 +135,6 @@ public final class JobfFileWriter implements MappingWriter {
 
 		writeLn();
 
-		dstName = null;
 		return isClass; // only members are supported, skip anything but class contents
 	}
 
