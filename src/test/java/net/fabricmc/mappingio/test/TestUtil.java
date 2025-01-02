@@ -165,6 +165,10 @@ public final class TestUtil {
 			int[] dstNs = new int[] { 0, 1 };
 			NameGen nameGen = new NameGen();
 
+			if (nameGen.visitPackage(delegate, dstNs)) {
+				nameGen.visitComment(delegate);
+			}
+
 			if (nameGen.visitClass(delegate, dstNs)) {
 				nameGen.visitField(delegate, dstNs);
 
@@ -291,6 +295,10 @@ public final class TestUtil {
 
 		if (delegate.visitContent()) {
 			NameGen nameGen = new NameGen();
+
+			// Packages
+			nameGen.visitPackage(delegate, 0);
+			nameGen.visitPackage(delegate, 1);
 
 			// (Inner) Classes
 			for (int nestLevel = 0; nestLevel <= 2; nestLevel++) {

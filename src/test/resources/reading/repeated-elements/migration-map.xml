@@ -2,6 +2,8 @@
 <migrationMap>
 	<name value="repeated-elements"/>
 	<order value="0"/>
+	<entry oldName="package_1" newName="package1Ns0Rename0" type="package" recursive="false"/>
+	<entry oldName="package_1" newName="package1Ns0Rename" type="package" recursive="false"/>
 	<entry oldName="class_1" newName="class1Ns0Rename0" type="class"/>
 	<entry oldName="class_1" newName="class1Ns0Rename" type="class"/>
 	<entry oldName="class_1$class_2" newName="class1Ns0Rename$class2Ns0Rename0" type="class"/>

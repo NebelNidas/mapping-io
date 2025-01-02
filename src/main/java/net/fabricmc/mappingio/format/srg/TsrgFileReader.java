@@ -176,7 +176,7 @@ public final class TsrgFileReader {
 					if (srcName == null || srcName.isEmpty()) throw new IOException("missing package-/class-name-a in line "+reader.getLineNumber());
 
 					if (srcName.endsWith("/")) { // package
-						if (visitor.visitPackage(srcName)) {
+						if (visitor.visitPackage(srcName.substring(0, srcName.length() - 1))) {
 							readElement(reader, MappedElementKind.PACKAGE, 0, dstNsCount, visitor);
 						}
 					} else { // class
@@ -303,6 +303,10 @@ public final class TsrgFileReader {
 
 			if (name == null) throw new IOException("missing name columns in line "+reader.getLineNumber());
 			if (name.isEmpty()) throw new IOException("missing destination name in line "+reader.getLineNumber());
+
+			if (subjectKind == MappedElementKind.PACKAGE) {
+				name = name.substring(0, name.length() - 1);
+			}
 
 			visitor.visitDstName(subjectKind, dstNs, name);
 		}

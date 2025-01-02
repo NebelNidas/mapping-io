@@ -26,6 +26,18 @@ import net.fabricmc.mappingio.MappedElementKind;
 import net.fabricmc.mappingio.MappingVisitor;
 
 class NameGen {
+	boolean visitPackage(MappingVisitor target, int... dstNs) throws IOException {
+		if (!target.visitPackage(src(pkgKind))) {
+			return false;
+		}
+
+		for (int ns : dstNs) {
+			target.visitDstName(pkgKind, ns, dst(pkgKind, ns));
+		}
+
+		return target.visitElementContent(pkgKind);
+	}
+
 	boolean visitClass(MappingVisitor target, int... dstNs) throws IOException {
 		return visitInnerClass(target, 0, dstNs);
 	}
@@ -215,6 +227,8 @@ class NameGen {
 
 	private AtomicInteger getCounter(MappedElementKind kind) {
 		switch (kind) {
+		case PACKAGE:
+			return pkgNum;
 		case CLASS:
 			return clsNum;
 		case FIELD:
@@ -232,6 +246,8 @@ class NameGen {
 
 	private String getPrefix(MappedElementKind kind) {
 		switch (kind) {
+		case PACKAGE:
+			return pkgPrefix;
 		case CLASS:
 			return clsPrefix;
 		case FIELD:
@@ -247,6 +263,7 @@ class NameGen {
 		}
 	}
 
+	private static final String pkgPrefix = "package";
 	private static final String clsPrefix = "class";
 	private static final String fldPrefix = "field";
 	private static final String mthPrefix = "method";
@@ -255,11 +272,13 @@ class NameGen {
 	private static final String comment = "This is a comment";
 	private static final List<String> fldDescs = Collections.unmodifiableList(Arrays.asList("I", "Lcls;", "Lpkg/cls;", "[I"));
 	private static final List<String> mthDescs = Collections.unmodifiableList(Arrays.asList("()I", "(I)V", "(Lcls;)Lcls;", "(ILcls;)Lpkg/cls;", "(Lcls;[I)[[B"));
+	private static final MappedElementKind pkgKind = MappedElementKind.PACKAGE;
 	private static final MappedElementKind clsKind = MappedElementKind.CLASS;
 	private static final MappedElementKind fldKind = MappedElementKind.FIELD;
 	private static final MappedElementKind mthKind = MappedElementKind.METHOD;
 	private static final MappedElementKind argKind = MappedElementKind.METHOD_ARG;
 	private static final MappedElementKind varKind = MappedElementKind.METHOD_VAR;
+	private final AtomicInteger pkgNum = new AtomicInteger();
 	private final AtomicInteger clsNum = new AtomicInteger();
 	private final AtomicInteger fldNum = new AtomicInteger();
 	private final AtomicInteger mthNum = new AtomicInteger();

@@ -1,4 +1,6 @@
 tsrg2 source target target2
+package_1/ package1Ns0Rename/ package_1/
+package_2/ package_2/ package2Ns1Rename/
 class_3 package_3/class3Ns0Rename class_3
 package_4/class_4 package_4/class_4 class4Ns1Rename
 package_6/class_6 package_7/class6Ns0Rename package_6/class_6

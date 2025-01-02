@@ -85,11 +85,11 @@ public final class SrgFileReader {
 							classContentVisitPending = false;
 						}
 
-						if (visitor.visitPackage(srcName)) {
+						if (visitor.visitPackage(srcName.substring(0, srcName.length() - 1))) {
 							String dstName = reader.nextCol();
 							if (dstName == null || dstName.isEmpty()) throw new IOException("missing package-name-b in line "+reader.getLineNumber());
 
-							visitor.visitDstName(MappedElementKind.PACKAGE, 0, dstName);
+							visitor.visitDstName(MappedElementKind.PACKAGE, 0, dstName.substring(0, dstName.length() - 1));
 							visitor.visitElementContent(MappedElementKind.PACKAGE);
 						}
 					} else if (reader.nextCol("CL:")) { // class: CL: <src> <dst>
