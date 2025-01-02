@@ -37,10 +37,10 @@ import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MappingTreeView;
 import net.fabricmc.mappingio.tree.MappingTreeView.ClassMappingView;
 import net.fabricmc.mappingio.tree.MappingTreeView.FieldMappingView;
-import net.fabricmc.mappingio.tree.MappingTreeView.PackageMappingView;
 import net.fabricmc.mappingio.tree.MappingTreeView.MethodArgMappingView;
 import net.fabricmc.mappingio.tree.MappingTreeView.MethodMappingView;
 import net.fabricmc.mappingio.tree.MappingTreeView.MethodVarMappingView;
+import net.fabricmc.mappingio.tree.MappingTreeView.PackageMappingView;
 
 /**
  * A visitor which asserts that the visited mappings are a subset of a superset tree.
