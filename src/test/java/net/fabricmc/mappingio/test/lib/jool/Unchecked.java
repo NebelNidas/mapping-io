@@ -105,8 +105,8 @@ public class Unchecked {
 
 	/**
 	 * Wrap a {@link CheckedConsumer} in a {@link Consumer}.
-	 * <p>
-	 * Example:
+	 *
+	 * <p>Example:
 	 * <pre><code>
 	 * Arrays.asList("a", "b").stream().forEach(Unchecked.consumer(s -> {
 	 *     if (s.length() > 10)
@@ -120,8 +120,8 @@ public class Unchecked {
 
 	/**
 	 * Wrap a {@link CheckedConsumer} in a {@link Consumer} with a custom handler for checked exceptions.
-	 * <p>
-	 * Example:
+	 *
+	 * <p>Example:
 	 * <pre><code>
 	 * Arrays.asList("a", "b").stream().forEach(Unchecked.consumer(
 	 *     s -> {
@@ -138,8 +138,7 @@ public class Unchecked {
 		return t -> {
 			try {
 				consumer.accept(t);
-			}
-			catch (Throwable e) {
+			} catch (Throwable e) {
 				handler.accept(e);
 
 				throw new IllegalStateException("Exception handler must throw a RuntimeException", e);

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c), Data Geekery GmbH, contact@datageekery.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,6 @@ package net.fabricmc.mappingio.test.lib.jool.fi.util.function;
 
 import java.util.function.Consumer;
 
-import net.fabricmc.mappingio.test.lib.jool.Unchecked;
-
 /**
  * A {@link Consumer} that allows for checked exceptions.
  *
@@ -27,25 +25,10 @@ import net.fabricmc.mappingio.test.lib.jool.Unchecked;
  */
 @FunctionalInterface
 public interface CheckedConsumer<T> {
-
-    /**
-     * Performs this operation on the given argument.
-     *
-     * @param t the input argument
-     */
-    void accept(T t) throws Throwable;
-
-    /**
-     * @see {@link Unchecked#consumer(CheckedConsumer)}
-     */
-    static <T> Consumer<T> unchecked(CheckedConsumer<T> consumer) {
-        return Unchecked.consumer(consumer);
-    }
-
-    /**
-     * @see {@link Unchecked#consumer(CheckedConsumer, Consumer)}
-     */
-    static <T> Consumer<T> unchecked(CheckedConsumer<T> consumer, Consumer<Throwable> handler) {
-        return Unchecked.consumer(consumer, handler);
-    }
+	/**
+	 * Performs this operation on the given argument.
+	 *
+	 * @param t the input argument
+	 */
+	void accept(T t) throws Throwable;
 }
