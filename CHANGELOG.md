@@ -5,6 +5,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Made `OuterClassNamePropagator` configurable
+- Added `MappingTree#propagateOuterClassNames` as a more efficient tree-API alternative to `OuterClassNamePropagator`
 - Added a simplified `MappingNsCompleter` constructor for completing all destination names with the source names
 
 ## [0.7.1] - 2025-01-07
