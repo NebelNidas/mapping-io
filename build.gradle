@@ -201,13 +201,8 @@ jar {
 tasks.register("generateTestMappings", JavaExec) {
 	dependsOn("testClasses")
 	classpath = sourceSets.test.runtimeClasspath
-	mainClass = 'net.fabricmc.mappingio.TestFileUpdater'
-}
-
-tasks.register("updateTestMappings", Copy) {
-	dependsOn("generateTestMappings")
-	from 'build/resources/test/'
-	into 'src/test/resources/'
+	mainClass = 'net.fabricmc.mappingio.test.TestFileUpdater'
+	args = [file('src/test/resources/').getAbsolutePath()]
 }
 
 // A task to ensure that the version being released has not already been released.
