@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Made `OuterClassNamePropagator` more configurable
+- Made `OuterClassNamePropagator` configurable
+- Added a simplified `MappingNsCompleter` constructor for completing all destination names with the source names
 
 ## [0.7.0] - 2025-01-01
 - Added IntelliJ IDEA migration map reader and writer
