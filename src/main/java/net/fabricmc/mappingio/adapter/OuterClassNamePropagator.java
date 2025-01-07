@@ -57,10 +57,12 @@ public class OuterClassNamePropagator extends ForwardingMappingVisitor {
 	}
 
 	/**
-	 * @param namespaces The destination namespaces where outer class names shall be propagated.
+	 * Constructs a new {@link OuterClassNamePropagator} which processes the selected destination namespaces.
+	 *
+	 * @param namespaces The destination namespaces where outer class names shall be propagated. Pass {@code null} to process all destination namespaces.
 	 * @param processRemappedDstNames Whether already remapped destination names should also get their unmapped outer classes replaced.
 	 */
-	public OuterClassNamePropagator(MappingVisitor next, Collection<String> namespaces, boolean processRemappedDstNames) {
+	public OuterClassNamePropagator(MappingVisitor next, @Nullable Collection<String> namespaces, boolean processRemappedDstNames) {
 		super(next);
 		this.dstNamespacesToProcess = namespaces;
 		this.processRemappedDstNames = processRemappedDstNames;
@@ -257,6 +259,8 @@ public class OuterClassNamePropagator extends ForwardingMappingVisitor {
 	private final boolean processRemappedDstNames;
 	private final Map<String, String[]> dstNamesBySrcName = new HashMap<>();
 	private final Set<String> modifiedClasses = new HashSet<>();
+	private String srcNamespaceToProcess;
+	private int srcNsId;
 	private List<String> dstNamespaces;
 	private Collection<String> dstNamespacesToProcess;
 	private Collection<Integer> dstNamespaceIndicesToProcess;

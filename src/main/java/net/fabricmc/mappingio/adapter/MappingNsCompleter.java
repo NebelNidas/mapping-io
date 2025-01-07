@@ -49,7 +49,7 @@ public final class MappingNsCompleter extends ForwardingMappingVisitor {
 	 * @param alternatives A map of which namespaces should copy from which others.
 	 * Passing {@code null} causes all destination namespaces to be completed.
 	 */
-	public MappingNsCompleter(MappingVisitor next, Map<String, String> alternatives) {
+	public MappingNsCompleter(MappingVisitor next, @Nullable Map<String, String> alternatives) {
 		this(next, alternatives, false);
 	}
 
@@ -59,7 +59,7 @@ public final class MappingNsCompleter extends ForwardingMappingVisitor {
 	 * Passing {@code null} causes all destination namespaces to be completed.
 	 * @param addMissingNs Whether to copy namespaces from the alternatives key set if not already present.
 	 */
-	public MappingNsCompleter(MappingVisitor next, Map<String, String> alternatives, boolean addMissingNs) {
+	public MappingNsCompleter(MappingVisitor next, @Nullable Map<String, String> alternatives, boolean addMissingNs) {
 		super(next);
 
 		this.alternatives = alternatives;
