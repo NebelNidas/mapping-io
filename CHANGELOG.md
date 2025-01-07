@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made `OuterClassNamePropagator` configurable
 - Added a simplified `MappingNsCompleter` constructor for completing all destination names with the source names
 
+## [0.7.1] - 2025-01-07
+- Restored the ability to read source-namespace-only mapping files, even if not spec-compliant
+
 ## [0.7.0] - 2025-01-01
 - Added IntelliJ IDEA migration map reader and writer
 - Added `MappingFormat#features()` to allow for more fine-grained programmatic querying of format capabilities
@@ -21,10 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added missing visit calls to multiple readers
 - Added safeguards to `MemoryMappingTree` preventing external data modification during an ongoing visitation pass
 - Clearly defined tree-API contracts regarding returned collections' mutability
-- Fixed `MemoryMappingTree#reset` to actually reset all its internal state related to the current visitation pass
+- Fixed `MemoryMappingTree#reset()` to actually reset all its internal state related to the current visitation pass
 - Fixed and improved `MemoryMappingTree`'s merging capabilities:
-  - Fixed broken member mapping merging via tree-API in `MemoryMappingTree`
-  - Fixed existing entries' data not getting overridden when merging elements into `MemoryMappingTree` via tree-API
+  - Fixed broken tree-API member mapping merging
+  - Fixed existing entries' data not getting overridden when merging elements via tree-API
   - Fixed NPE when visiting with flipped namespaces ([issue 68](https://github.com/FabricMC/mapping-io/issues/68))
   - Made merging with flipped namespaces actually work and handle both names and descriptors
   - Fixed potentially incorrect descriptor computation by delaying until all classes are present and merged
