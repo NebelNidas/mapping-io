@@ -30,12 +30,6 @@ import net.fabricmc.mappingio.MappingWriter;
 import net.fabricmc.mappingio.format.MappingFormat;
 import net.fabricmc.mappingio.tree.MappingTreeView;
 
-/*
- * After any changes to the "accept" methods, run the "generateTestMappings" Gradle task
- * to update the mapping files located in the resources folder accordingly.
- *
- * Make sure to keep the manual Enigma and SRG changes in the "repeated-elements" directory.
- */
 public final class TestUtil {
 	public static void setResourceRoot(Path path) {
 		resourceRoot = path;

@@ -42,6 +42,12 @@ import net.fabricmc.mappingio.test.lib.jool.Unchecked;
 import net.fabricmc.mappingio.test.visitors.NopMappingVisitor;
 import net.fabricmc.mappingio.test.visitors.VisitOrderVerifyingVisitor;
 
+/*
+ * After any changes to the "generate" methods, run the "generateTestMappings" Gradle task
+ * to update the mapping files located in the resources folder accordingly.
+ *
+ * Make sure to keep the manual Enigma and SRG changes in the "repeated-elements" directory.
+ */
 public class TestMappings {
 	public static <T extends MappingVisitor> T generateValid(T target) throws IOException {
 		MappingVisitor delegate = target instanceof VisitOrderVerifyingVisitor ? target : new VisitOrderVerifyingVisitor(target);

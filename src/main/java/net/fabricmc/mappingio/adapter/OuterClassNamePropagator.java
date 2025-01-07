@@ -37,8 +37,8 @@ import net.fabricmc.mappingio.MappingVisitor;
 
 /**
  * Searches for inner classes whose effective destination name contains outer classes referenced via their source name,
- * waits for mappings for these enclosing classes, and applies the latter's destination names
- * to the former's fully qualified name.
+ * waits for mappings for these enclosing classes, and applies the latters' destination names
+ * to the formers' fully qualified name.
  *
  * <p>For example, it takes a class {@code class_1$class_2} that doesn't have a mapping,
  * tries to find {@code class_1}, which let's say has the mapping {@code SomeClass},
@@ -57,7 +57,7 @@ public class OuterClassNamePropagator extends ForwardingMappingVisitor {
 	}
 
 	/**
-	 * @param namespaces The destination namespaces where outer class names shall be propagated (isolated from each other).
+	 * @param namespaces The destination namespaces where outer class names shall be propagated.
 	 * @param processRemappedDstNames Whether already remapped destination names should also get their unmapped outer classes replaced.
 	 */
 	public OuterClassNamePropagator(MappingVisitor next, Collection<String> namespaces, boolean processRemappedDstNames) {
@@ -91,12 +91,12 @@ public class OuterClassNamePropagator extends ForwardingMappingVisitor {
 			} else {
 				if (dstNamespacesToProcess.contains(srcNamespace)) {
 					throw new UnsupportedOperationException(srcNamespace + " was passed as a destination namespace"
-							+ " to propagate outer class names to, but has been visited as the source namespace.");
+							+ " to propagate outer class names in, but has been visited as the source namespace.");
 				}
 
 				for (String ns : dstNamespacesToProcess) {
 					if (!dstNamespaces.contains(ns)) {
-						throw new IllegalArgumentException(ns + " was passed as a destination namespace to propagate outer class names to,"
+						throw new IllegalArgumentException(ns + " was passed as a destination namespace to propagate outer class names in,"
 								+ " but is not present in the namespaces of the current visitation pass.");
 					}
 				}
@@ -210,7 +210,7 @@ public class OuterClassNamePropagator extends ForwardingMappingVisitor {
 						String outerSrcName = String.join("$", Arrays.copyOfRange(srcParts, 0, pos + 1));
 
 						if (dstName != null && !dstParts[pos].equals(srcParts[pos])) {
-							// That part already has a differing mapping
+							// That part already has a different mapping
 							continue;
 						}
 
