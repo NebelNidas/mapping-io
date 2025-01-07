@@ -114,8 +114,8 @@ public interface MappingTree extends MappingTreeView {
 
 	/**
 	 * Searches for inner classes whose effective destination name contains outer classes referenced via their source name,
-	 * scans the tree for potential mappings for these enclosing classes, and applies the latter's destination names
-	 * to the former's fully qualified name.
+	 * scans the tree for potential mappings for these enclosing classes, and applies the latters' destination names
+	 * to the formers' fully qualified name.
 	 *
 	 * <p>For example, it takes a class {@code class_1$class_2} that doesn't have a mapping,
 	 * tries to find {@code class_1}, which let's say has the mapping {@code SomeClass},
@@ -132,8 +132,8 @@ public interface MappingTree extends MappingTreeView {
 
 	/**
 	 * Searches for inner classes whose effective destination name contains outer classes referenced via their source name,
-	 * scans the tree for potential mappings for these enclosing classes, and applies the latter's destination names
-	 * to the former's fully qualified name.
+	 * scans the tree for potential mappings for these enclosing classes, and applies the latters' destination names
+	 * to the formers' fully qualified name.
 	 *
 	 * <p>For example, it takes a class {@code class_1$class_2} that doesn't have a mapping,
 	 * tries to find {@code class_1}, which let's say has the mapping {@code SomeClass},
@@ -143,7 +143,7 @@ public interface MappingTree extends MappingTreeView {
 	 * since the tree's existing class map can be reused.
 	 *
 	 * @param srcNamespace The namespace where the original/unmapped outer class names originate from.
-	 * @param dstNamespaces The namespaces where outer class names shall be propagated (isolated from each other).
+	 * @param dstNamespaces The namespaces where outer class names shall be propagated.
 	 * @param processRemappedDstNames Whether already remapped destination names should also get their unmapped outer classes replaced.
 	 */
 	default void propagateOuterClassNames(String srcNamespace, Collection<String> dstNamespaces, boolean processRemappedDstNames) {
