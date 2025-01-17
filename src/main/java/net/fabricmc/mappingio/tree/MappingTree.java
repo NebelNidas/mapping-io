@@ -21,12 +21,42 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.fabricmc.mappingio.adapter.MappingDstNsReorder;
+import net.fabricmc.mappingio.adapter.MappingSourceNsSwitch;
+
 /**
  * Mutable mapping tree.
+ *
+ * <p>All returned collections are to be assumed unmodifiable, unless explicitly stated otherwise.
  */
 public interface MappingTree extends MappingTreeView {
+	/**
+	 * Sets the tree's and all of its contained elements' source namespace name.
+	 *
+	 * <p>If the passed namespace name equals an existing destination namespace's name,
+	 * implementors may choose to switch the two namespaces around, analogous to {@link MappingSourceNsSwitch}.
+	 * This has to be made clear in the implementation's documentation.
+	 *
+	 * @implSpec If switching with an existing destination namespace is requested, but not supported, an {@link UnsupportedOperationException} must be thrown.
+	 *
+	 * @return The previous source namespace name, if present.
+	 */
 	@Nullable
 	String setSrcNamespace(String namespace);
+
+	/**
+	 * Sets the tree's and all of its contained elements' destination namespace names.
+	 *
+	 * <p>Can be used to reorder and/or drop destination namespaces, analogous to {@link MappingDstNsReorder}.
+	 *
+	 * <p>Implementors may allow switching with the source namespace as well, analogous to {@link MappingSourceNsSwitch}.
+	 * This has to be made clear in the implementation's documentation.
+	 *
+	 * @implSpec If switching with the source namespace is requested, but not supported, an {@link UnsupportedOperationException} must be thrown.
+	 *
+	 * @return The previous destination namespaces.
+	 * @throws IllegalArgumentException If the passed namespace names contain duplicates.
+	 */
 	List<String> setDstNamespaces(List<String> namespaces);
 
 	/**
@@ -37,8 +67,7 @@ public interface MappingTree extends MappingTreeView {
 	List<? extends MetadataEntry> getMetadata();
 
 	/**
-	 * @return An unmodifiable list of all metadata entries currently present
-	 * in the tree whose key is equal to the passed one.
+	 * @return An unmodifiable list of all currently present metadata entries whose key is equal to the passed one.
 	 * The list's order is equal to the order in which the entries have been originally added.
 	 */
 	@Override
@@ -49,7 +78,7 @@ public interface MappingTree extends MappingTreeView {
 	/**
 	 * Removes all metadata entries whose key is equal to the passed one.
 	 *
-	 * @return Whether or not any entries have been removed.
+	 * @return Whether any entries have been removed.
 	 */
 	boolean removeMetadata(String key);
 
@@ -65,7 +94,19 @@ public interface MappingTree extends MappingTreeView {
 		return (ClassMapping) MappingTreeView.super.getClass(name, namespace);
 	}
 
+	/**
+	 * Merges a class mapping into the tree.
+	 *
+	 * @return The {@link ClassMapping} instance present in the tree after the merge has occurred.
+	 * May or may not be the passed instance.
+	 */
 	ClassMapping addClass(ClassMapping cls);
+
+	/**
+	 * Removes a class mapping from the tree.
+	 *
+	 * @return The removed class mapping, if any.
+	 */
 	@Nullable
 	ClassMapping removeClass(String srcName);
 
@@ -117,7 +158,19 @@ public interface MappingTree extends MappingTreeView {
 			return (FieldMapping) ClassMappingView.super.getField(name, desc, namespace);
 		}
 
+		/**
+		 * Merges a field mapping into the class.
+		 *
+		 * @return The {@link FieldMapping} instance present in the parent {@link ClassMapping} after the merge has occurred.
+		 * May or may not be the passed instance.
+		 */
 		FieldMapping addField(FieldMapping field);
+
+		/**
+		 * Removes a field mapping from the class.
+		 *
+		 * @return The removed field mapping, if any.
+		 */
 		@Nullable
 		FieldMapping removeField(String srcName, @Nullable String srcDesc);
 
@@ -133,7 +186,19 @@ public interface MappingTree extends MappingTreeView {
 			return (MethodMapping) ClassMappingView.super.getMethod(name, desc, namespace);
 		}
 
+		/**
+		 * Merges a method mapping into the class.
+		 *
+		 * @return The {@link MethodMapping} instance present in the parent {@link ClassMapping} after the merge has occurred.
+		 * May or may not be the passed instance.
+		 */
 		MethodMapping addMethod(MethodMapping method);
+
+		/**
+		 * Removes a method mapping from the class.
+		 *
+		 * @return The removed method mapping, if any.
+		 */
 		@Nullable
 		MethodMapping removeMethod(String srcName, @Nullable String srcDesc);
 	}
@@ -153,6 +218,12 @@ public interface MappingTree extends MappingTreeView {
 		@Nullable
 		MethodArgMapping getArg(int argPosition, int lvIndex, @Nullable String srcName);
 		MethodArgMapping addArg(MethodArgMapping arg);
+
+		/**
+		 * Removes an argument mapping from the method.
+		 *
+		 * @return The removed argument mapping, if any.
+		 */
 		@Nullable
 		MethodArgMapping removeArg(int argPosition, int lvIndex, @Nullable String srcName);
 
@@ -161,7 +232,20 @@ public interface MappingTree extends MappingTreeView {
 		@Override
 		@Nullable
 		MethodVarMapping getVar(int lvtRowIndex, int lvIndex, int startOpIdx, int endOpIdx, @Nullable String srcName);
+
+		/**
+		 * Merges a variable mapping into the method.
+		 *
+		 * @return The {@link MethodVarMapping} instance present in the parent {@link MethodMapping} after the merge has occurred.
+		 * May or may not be the passed instance.
+		 */
 		MethodVarMapping addVar(MethodVarMapping var);
+
+		/**
+		 * Removes a variable mapping from the method.
+		 *
+		 * @return The removed variable mapping, if any.
+		 */
 		@Nullable
 		MethodVarMapping removeVar(int lvtRowIndex, int lvIndex, int startOpIdx, int endOpIdx, @Nullable String srcName);
 	}

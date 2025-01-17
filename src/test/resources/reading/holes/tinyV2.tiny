@@ -1,0 +1,70 @@
+tiny	2	0	source	target	target2
+c	class_1		
+c	package_2/class_2		
+c	class_3	package_3/class3Ns0Rename	
+c	package_4/class_4		class4Ns1Rename
+c	class_5		
+	c	This is a comment
+c	package_6/class_6	package_7/class6Ns0Rename	
+	c	This is a comment
+c	class_7		class7Ns1Rename
+	c	This is a comment
+c	package_8/class_8		
+c	class_9		
+c	class_9$class_10	class_9$class10Ns0Rename	
+c	class_11$class_12		class_11$class12Ns1Rename
+c	class_13$class_14		
+	c	This is a comment
+c	class_15$class_16	class_15$class16Ns0Rename	
+	c	This is a comment
+c	class_17$class_18		class_17$class18Ns1Rename
+	c	This is a comment
+c	class_19		
+c	package_20/class_20		
+c	package_20/class_20$class_21$class_22	package_20/class_20$class_21$class22Ns0Rename	
+c	class_23$class_24$class_25		class_23$class_24$class25Ns1Rename
+c	package_26/class_26$class_27$class_28		
+	c	This is a comment
+c	class_29$class_30$class_31	class_29$class_30$class31Ns0Rename	
+	c	This is a comment
+c	package_32/class_32$class_33$class_34		package_32/class_32$class_33$class34Ns1Rename
+	c	This is a comment
+c	class_35		
+	f	I	field_1		
+	f	Lcls;	field_2	field2Ns0Rename	
+	f	Lpkg/cls;	field_3		field3Ns1Rename
+	f	[I	field_4		
+		c	This is a comment
+	f	I	field_5	field5Ns0Rename	
+		c	This is a comment
+	f	Lcls;	field_6		field6Ns1Rename
+		c	This is a comment
+	m	()I	method_1		
+	m	(I)V	method_2	method2Ns0Rename	
+	m	(Lcls;)Lcls;	method_3		method3Ns1Rename
+	m	(ILcls;)Lpkg/cls;	method_4		
+		c	This is a comment
+	m	(Lcls;[I)[[B	method_5	method5Ns0Rename	
+		c	This is a comment
+	m	()I	method_6		method6Ns1Rename
+		c	This is a comment
+	m	(I)V	method_7		
+		p	1	param_1		
+		p	3	param_2		param2Ns1Rename
+		p	5	param_3	param3Ns0Rename	
+		p	7	param_4		
+			c	This is a comment
+		p	9	param_5	param5Ns0Rename	
+			c	This is a comment
+		p	11	param_6		param6Ns1Rename
+			c	This is a comment
+	m	(Lcls;)Lcls;	method_8		
+		v	12	12	12	var_1		
+		v	14	14	14	var_2		var2Ns1Rename
+		v	16	16	16	var_3	var3Ns0Rename	
+		v	18	18	18	var_4		
+			c	This is a comment
+		v	20	20	20	var_5	var5Ns0Rename	
+			c	This is a comment
+		v	22	22	22	var_6		var6Ns1Rename
+			c	This is a comment

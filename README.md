@@ -14,7 +14,7 @@ MappingReader.read(inputPath, /* optional */ inputFormat,
 ```
 
 The above example reads mappings from the input path directly into a `MappingWriter`, writing all contents to disk in the specified format.
-Keep in mind that the conversion process might be lossy if the two formats' feature sets differ; see the comparison table [here](./src/main/java/net/fabricmc/mappingio/format/MappingFormat.java) for more details.
+Keep in mind that the conversion process might be lossy if the two formats' feature sets differ; see the comparison table [here](https://fabricmc.net/wiki/documentation:mapping_formats) for more details.
 
 You can also read into a tree first:
 ```java
@@ -33,7 +33,7 @@ For further information, please consult the project's Javadocs.
 
 
 ### Maven
-Mapping-IO is available from the [FabricMC Maven](https://maven.fabricmc.net/net/fabricmc/mapping-io), version 0.4.2 and onwards can also be found on Maven Central.
+Mapping-IO is available from the [FabricMC Maven](https://maven.fabricmc.net/net/fabricmc/mapping-io). Version 0.4.2 and onward can also be found on Maven Central.
 
 Gradle snippet:
 ```gradle
@@ -42,6 +42,6 @@ repositories {
 }
 
 dependencies {
-	api 'net.fabricmc:mapping-io:${mappingio_version}'
+	implementation "net.fabricmc:mapping-io:${mappingio_version}"
 }
 ```

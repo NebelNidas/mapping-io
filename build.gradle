@@ -1,6 +1,6 @@
 plugins {
-	id "com.diffplug.spotless" version "6.22.0" apply false
-	id "me.modmuss50.remotesign" version "0.4.0" apply false
+	id "com.diffplug.spotless" apply false
+	id "me.modmuss50.remotesign" apply false
 }
 
 def ENV = System.getenv()
@@ -25,23 +25,35 @@ allprojects {
 		toolVersion = project.checkstyle_tool_version
 	}
 
+	spotless {
+		lineEndings = com.diffplug.spotless.LineEnding.UNIX
+
+		java {
+			licenseHeaderFile(rootProject.file("HEADER")).yearSeparator(", ")
+			removeUnusedImports()
+			importOrder('java', 'javax', '', 'net.fabricmc')
+			indentWithTabs()
+			trimTrailingWhitespace()
+			targetExclude(
+					'src/test/java/net/fabricmc/mappingio/test/lib/**/*.java',
+					'src/main/java/net/fabricmc/mappingio/tree/AlphanumericComparator.java')
+		}
+	}
+
 	repositories {
 		mavenCentral()
 	}
 
 	dependencies {
-		implementation "org.ow2.asm:asm:${project.asm_version}"
 		compileOnly "org.jetbrains:annotations:${project.jetbrains_annotations_version}"
 
+		testImplementation "net.neoforged:srgutils:${srgutils_version}"
+		testImplementation "org.cadixdev:lorenz:${lorenz_version}"
+		testImplementation "org.cadixdev:lorenz-io-enigma:${lorenz_version}"
+		testImplementation "org.cadixdev:lorenz-io-jam:${lorenz_version}"
 		testImplementation "org.junit.jupiter:junit-jupiter:${junit_jupiter_version}"
 		testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 		testCompileOnly "org.jetbrains:annotations:${project.jetbrains_annotations_version}"
-	}
-
-	spotless {
-		java {
-			licenseHeaderFile(rootProject.file("HEADER")).yearSeparator(", ")
-		}
 	}
 
 	java {
@@ -58,9 +70,15 @@ allprojects {
 
 	javadoc {
 		failOnError = false
+
 		options {
 			// Disable the crazy super-strict doclint tool in Java 8
 			addStringOption('Xdoclint:none', '-quiet')
+
+			tags(
+				'apiNote:a:API Note:',
+				'implSpec:a:Implementation Requirements:',
+				'implNote:a:Implementation Note:')
 		}
 	}
 
@@ -180,8 +198,15 @@ jar {
 	}
 }
 
+tasks.register("generateTestMappings", JavaExec) {
+	dependsOn("testClasses")
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'net.fabricmc.mappingio.test.TestFileUpdater'
+	args = [file('src/test/resources/').getAbsolutePath()]
+}
+
 // A task to ensure that the version being released has not already been released.
-task checkVersion {
+tasks.register("checkVersion") {
 	doFirst {
 		def xml = new URL("https://maven.fabricmc.net/net/fabricmc/mapping-io/maven-metadata.xml").text
 		def metadata = new XmlSlurper().parseText(xml)

@@ -69,8 +69,9 @@ public final class SrgFileReader {
 			}
 
 			if (visitor.visitContent()) {
-				String lastClass = null;
-				boolean visitLastClass = false;
+				String lastClassSrcName = null;
+				String lastClassDstName = null;
+				boolean classContentVisitPending = false;
 
 				do {
 					boolean isMethod;
@@ -79,24 +80,27 @@ public final class SrgFileReader {
 						String srcName = reader.nextCol();
 						if (srcName == null || srcName.isEmpty()) throw new IOException("missing class-name-a in line "+reader.getLineNumber());
 
-						if (!srcName.equals(lastClass)) {
-							lastClass = srcName;
-							visitLastClass = visitor.visitClass(srcName);
+						if (classContentVisitPending) {
+							visitor.visitElementContent(MappedElementKind.CLASS);
+							classContentVisitPending = false;
+						}
 
-							if (visitLastClass) {
-								String dstName = reader.nextCol();
-								if (dstName == null || dstName.isEmpty()) throw new IOException("missing class-name-b in line "+reader.getLineNumber());
+						lastClassSrcName = srcName;
 
-								visitor.visitDstName(MappedElementKind.CLASS, 0, dstName);
-								visitLastClass = visitor.visitElementContent(MappedElementKind.CLASS);
-							}
+						if (visitor.visitClass(srcName)) {
+							String dstName = reader.nextCol();
+							if (dstName == null || dstName.isEmpty()) throw new IOException("missing class-name-b in line "+reader.getLineNumber());
+
+							lastClassDstName = dstName;
+							visitor.visitDstName(MappedElementKind.CLASS, 0, dstName);
+							classContentVisitPending = true;
 						}
 					} else if ((isMethod = reader.nextCol("MD:")) || reader.nextCol("FD:")) { // method: MD: <cls-a><name-a> <desc-a> <cls-b><name-b> <desc-b> or field: FD: <cls-a><name-a> <cls-b><name-b>
 						String src = reader.nextCol();
-						if (src == null) throw new IOException("missing class/name a in line "+reader.getLineNumber());
+						if (src == null) throw new IOException("missing class-/name-a in line "+reader.getLineNumber());
 
 						int srcSepPos = src.lastIndexOf('/');
-						if (srcSepPos <= 0 || srcSepPos == src.length() - 1) throw new IOException("invalid class/name a in line "+reader.getLineNumber());
+						if (srcSepPos <= 0 || srcSepPos == src.length() - 1) throw new IOException("invalid class-/name-a in line "+reader.getLineNumber());
 
 						String[] cols = new String[3];
 
@@ -111,46 +115,66 @@ public final class SrgFileReader {
 
 						if (isMethod || format == MappingFormat.XSRG_FILE) {
 							srcDesc = cols[0];
-							if (srcDesc == null || srcDesc.isEmpty()) throw new IOException("missing desc a in line "+reader.getLineNumber());
+							if (srcDesc == null || srcDesc.isEmpty()) throw new IOException("missing desc-a in line "+reader.getLineNumber());
 							dstName = cols[1];
 							dstDesc = cols[2];
-							if (dstDesc == null || dstDesc.isEmpty()) throw new IOException("missing desc b in line "+reader.getLineNumber());
+							if (dstDesc == null || dstDesc.isEmpty()) throw new IOException("missing desc-b in line "+reader.getLineNumber());
 						} else {
 							srcDesc = null;
 							dstName = cols[0];
 							dstDesc = null;
 						}
 
-						if (dstName == null) throw new IOException("missing class/name b in line "+reader.getLineNumber());
+						if (dstName == null) throw new IOException("missing class-/name-b in line "+reader.getLineNumber());
 
 						int dstSepPos = dstName.lastIndexOf('/');
-						if (dstSepPos <= 0 || dstSepPos == dstName.length() - 1) throw new IOException("invalid class/name b in line "+reader.getLineNumber());
+						if (dstSepPos <= 0 || dstSepPos == dstName.length() - 1) throw new IOException("invalid class-/name-b in line "+reader.getLineNumber());
 
 						String srcOwner = src.substring(0, srcSepPos);
+						String dstOwner = dstName.substring(0, dstSepPos);
+						boolean classVisitRequired = !srcOwner.equals(lastClassSrcName) || !dstOwner.equals(lastClassDstName);
 
-						if (!srcOwner.equals(lastClass)) {
-							lastClass = srcOwner;
-							visitLastClass = visitor.visitClass(srcOwner);
-
-							if (visitLastClass) {
-								visitor.visitDstName(MappedElementKind.CLASS, 0, dstName.substring(0, dstSepPos));
-								visitLastClass = visitor.visitElementContent(MappedElementKind.CLASS);
+						if (classVisitRequired) {
+							if (classContentVisitPending) {
+								visitor.visitElementContent(MappedElementKind.CLASS);
+								classContentVisitPending = false;
 							}
+
+							if (!visitor.visitClass(srcOwner)) {
+								lastClassSrcName = srcOwner;
+								continue;
+							}
+
+							classContentVisitPending = true;
 						}
 
-						if (visitLastClass) {
-							String srcName = src.substring(srcSepPos + 1);
+						lastClassSrcName = srcOwner;
 
-							if (isMethod && visitor.visitMethod(srcName, srcDesc)
-									|| !isMethod && visitor.visitField(srcName, srcDesc)) {
-								MappedElementKind kind = isMethod ? MappedElementKind.METHOD : MappedElementKind.FIELD;
-								visitor.visitDstName(kind, 0, dstName.substring(dstSepPos + 1));
-								visitor.visitDstDesc(kind, 0, dstDesc);
-								visitor.visitElementContent(kind);
-							}
+						if (classVisitRequired) {
+							visitor.visitDstName(MappedElementKind.CLASS, 0, dstOwner);
+							lastClassDstName = dstOwner;
+						}
+
+						if (classContentVisitPending) {
+							classContentVisitPending = false;
+							if (!visitor.visitElementContent(MappedElementKind.CLASS)) continue;
+						}
+
+						String srcName = src.substring(srcSepPos + 1);
+
+						if (isMethod && visitor.visitMethod(srcName, srcDesc)
+								|| !isMethod && visitor.visitField(srcName, srcDesc)) {
+							MappedElementKind kind = isMethod ? MappedElementKind.METHOD : MappedElementKind.FIELD;
+							visitor.visitDstName(kind, 0, dstName.substring(dstSepPos + 1));
+							visitor.visitDstDesc(kind, 0, dstDesc);
+							visitor.visitElementContent(kind);
 						}
 					}
 				} while (reader.nextLine(0));
+
+				if (classContentVisitPending) {
+					visitor.visitElementContent(MappedElementKind.CLASS);
+				}
 			}
 
 			if (visitor.visitEnd()) break;

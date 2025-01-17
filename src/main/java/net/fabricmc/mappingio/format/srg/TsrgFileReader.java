@@ -70,23 +70,30 @@ public final class TsrgFileReader {
 	}
 
 	private static void read(ColumnFileReader reader, String sourceNs, String targetNs, MappingVisitor visitor) throws IOException {
-		MappingFormat format = reader.nextCol("tsrg2") ? format = MappingFormat.TSRG_2_FILE : MappingFormat.TSRG_FILE;
+		MappingFormat format = reader.nextCol("tsrg2") ? MappingFormat.TSRG_2_FILE : MappingFormat.TSRG_FILE;
 		String srcNamespace;
 		List<String> dstNamespaces;
 		boolean readerMarked = false;
 
 		if (format == MappingFormat.TSRG_2_FILE) {
 			srcNamespace = reader.nextCol();
+			if (srcNamespace == null || srcNamespace.isEmpty()) throw new IOException("no source namespace in TSRG v2 header");
+
 			dstNamespaces = new ArrayList<>();
 			String dstNamespace;
 
-			while ((dstNamespace = reader.nextCol()) != null) {
+			while (!reader.isAtEol()) {
+				dstNamespace = reader.nextCol();
+				if (dstNamespace == null || dstNamespace.isEmpty()) throw new IOException("empty destination namespace in TSRG v2 header");
 				dstNamespaces.add(dstNamespace);
 			}
 
 			reader.nextLine(0);
 		} else {
+			if (sourceNs == null || sourceNs.isEmpty()) throw new IllegalArgumentException("provided source namespace must not be null or empty");
 			srcNamespace = sourceNs;
+
+			if (targetNs == null || targetNs.isEmpty()) throw new IllegalArgumentException("provided target namespace must not be null or empty");
 			dstNamespaces = Collections.singletonList(targetNs);
 		}
 
@@ -143,6 +150,7 @@ public final class TsrgFileReader {
 
 							if (visitor.visitMethod(parts[2], parts[4])) {
 								visitor.visitDstName(MappedElementKind.METHOD, 0, dstName);
+								visitor.visitElementContent(MappedElementKind.METHOD);
 							}
 
 							continue;
@@ -155,6 +163,7 @@ public final class TsrgFileReader {
 
 							if (visitor.visitField(parts[2], null)) {
 								visitor.visitDstName(MappedElementKind.FIELD, 0, dstName);
+								visitor.visitElementContent(MappedElementKind.FIELD);
 							}
 
 							continue;
@@ -167,13 +176,11 @@ public final class TsrgFileReader {
 					if (srcName == null || srcName.endsWith("/")) continue;
 					if (srcName.isEmpty()) throw new IOException("missing class-name-a in line "+reader.getLineNumber());
 
-					if (!srcName.equals(lastClass)) {
-						lastClass = srcName;
-						visitLastClass = visitor.visitClass(srcName);
+					lastClass = srcName;
+					visitLastClass = visitor.visitClass(srcName);
 
-						if (visitLastClass) {
-							visitLastClass = readClass(reader, format == MappingFormat.TSRG_2_FILE, dstNsCount, nameTmp, visitor);
-						}
+					if (visitLastClass) {
+						visitLastClass = readClass(reader, format == MappingFormat.TSRG_2_FILE, dstNsCount, nameTmp, visitor);
 					}
 				} while (reader.nextLine(0));
 			}
@@ -197,10 +204,10 @@ public final class TsrgFileReader {
 			if (reader.hasExtraIndents()) continue;
 
 			String srcName = reader.nextCol();
-			if (srcName == null || srcName.isEmpty()) throw new IOException("missing name-a in line "+reader.getLineNumber());
+			if (srcName == null || srcName.isEmpty()) throw new IOException("missing member-name-a in line "+reader.getLineNumber());
 
 			String arg = reader.nextCol();
-			if (arg == null) throw new IOException("missing desc/name-b in line "+reader.getLineNumber());
+			if (arg == null) throw new IOException("missing member-desc-a/member-name-b in line "+reader.getLineNumber());
 
 			if (arg.startsWith("(")) { // method: <nameA> <descA> <names>...
 				if (visitor.visitMethod(srcName, arg)) {
@@ -216,7 +223,7 @@ public final class TsrgFileReader {
 				for (int i = 0; i < dstNsCount - 1; i++) {
 					String name = reader.nextCol();
 					if (name == null) throw new IOException("missing name columns in line "+reader.getLineNumber());
-					if (name.isEmpty()) throw new IOException("missing destination name in line "+reader.getLineNumber());
+					if (name.isEmpty()) throw new IOException("missing field-name-b in line "+reader.getLineNumber());
 					nameTmp.add(name);
 				}
 
@@ -230,7 +237,7 @@ public final class TsrgFileReader {
 				} else { // arg is desc, nameTmp starts with 1st dst name: <nameA> <descA> <names>...
 					offset = 0;
 					desc = arg;
-					if (desc.isEmpty()) throw new IOException("empty field desc in line "+reader.getLineNumber());
+					if (desc.isEmpty()) throw new IOException("empty field-desc-a in line "+reader.getLineNumber());
 				}
 
 				if (visitor.visitField(srcName, desc)) {
@@ -267,10 +274,10 @@ public final class TsrgFileReader {
 				// method is static
 			} else {
 				int lvIndex = reader.nextIntCol();
-				if (lvIndex < 0) throw new IOException("missing/invalid parameter lv-index in line "+reader.getLineNumber());
+				if (lvIndex < 0) throw new IOException("missing/invalid parameter-lv-index in line "+reader.getLineNumber());
 
 				String srcName = reader.nextCol();
-				if (srcName == null) throw new IOException("missing var-name-a column in line "+reader.getLineNumber());
+				if (srcName == null) throw new IOException("missing parameter-name-a column in line "+reader.getLineNumber());
 				if (srcName.isEmpty()) srcName = null;
 
 				if (visitor.visitMethodArg(-1, lvIndex, srcName)) {

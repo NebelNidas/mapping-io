@@ -68,11 +68,10 @@ public final class EnigmaFileReader {
 
 			if (visitor.visitContent()) {
 				StringBuilder commentSb = new StringBuilder(200);
-				final MappingVisitor finalVisitor = visitor;
 
 				do {
 					if (reader.nextCol("CLASS")) { // class: CLASS <name-a> [<name-b>]
-						readClass(reader, 0, null, null, commentSb, finalVisitor);
+						readClass(reader, 0, null, null, commentSb, visitor);
 					}
 				} while (reader.nextLine(0));
 			}
@@ -207,7 +206,7 @@ public final class EnigmaFileReader {
 
 				if (reader.nextCol("ARG")) { // method parameter: ARG <lv-index> <name-b>
 					int lvIndex = reader.nextIntCol();
-					if (lvIndex < 0) throw new IOException("missing/invalid parameter lv-index in line "+reader.getLineNumber());
+					if (lvIndex < 0) throw new IOException("missing/invalid parameter-lv-index in line "+reader.getLineNumber());
 
 					if (visitor.visitMethodArg(-1, lvIndex, null)) {
 						String dstName = reader.nextCol();

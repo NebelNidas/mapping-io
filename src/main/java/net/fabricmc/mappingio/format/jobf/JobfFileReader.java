@@ -32,6 +32,9 @@ import net.fabricmc.mappingio.tree.MemoryMappingTree;
 
 /**
  * {@linkplain MappingFormat#JOBF_FILE JOBF file} reader.
+ *
+ * <p>Crashes if a second visit pass is requested without
+ * {@link MappingFlag#NEEDS_MULTIPLE_PASSES} having been passed beforehand.
  */
 public class JobfFileReader {
 	private JobfFileReader() {
@@ -70,36 +73,37 @@ public class JobfFileReader {
 				do {
 					boolean isField;
 
-					if (reader.nextCol("c")) { // class: c <name-a> = <name-b>
+					if (reader.nextCol("c")) { // class: c <pkg>.<cls-name-a> = <cls-name-b>
 						String srcName = reader.nextCol();
 						if (srcName == null || srcName.isEmpty()) throw new IOException("missing class-name-a in line "+reader.getLineNumber());
 						srcName = srcName.replace('.', '/');
 
-						if (!srcName.equals(lastClass)) {
-							lastClass = srcName;
-							visitLastClass = visitor.visitClass(srcName);
+						lastClass = srcName;
+						visitLastClass = visitor.visitClass(srcName);
 
-							if (visitLastClass) {
-								readSeparator(reader);
+						if (visitLastClass) {
+							readSeparator(reader);
 
-								String dstName = reader.nextCol();
-								if (dstName == null || dstName.isEmpty()) throw new IOException("missing class-name-b in line "+reader.getLineNumber());
+							String dstName = reader.nextCol();
+							if (dstName == null || dstName.isEmpty()) throw new IOException("missing class-name-b in line "+reader.getLineNumber());
 
-								visitor.visitDstName(MappedElementKind.CLASS, 0, dstName);
-								visitLastClass = visitor.visitElementContent(MappedElementKind.CLASS);
-							}
+							String pkg = srcName.substring(0, srcName.lastIndexOf('/') + 1);
+							dstName = pkg + dstName;
+
+							visitor.visitDstName(MappedElementKind.CLASS, 0, dstName);
+							visitLastClass = visitor.visitElementContent(MappedElementKind.CLASS);
 						}
 					} else if ((isField = reader.nextCol("f")) || reader.nextCol("m")) {
 						// field: f <cls-a>.<name-a>:<desc-a> = <name-b>
 						// method: m <cls-a>.<name-a><desc-a> = <name-b>
 						String src = reader.nextCol();
-						if (src == null || src.isEmpty()) throw new IOException("missing class/name/desc a in line "+reader.getLineNumber());
+						if (src == null || src.isEmpty()) throw new IOException("missing class-/name-/desc-a in line "+reader.getLineNumber());
 
 						int nameSepPos = src.lastIndexOf('.');
-						if (nameSepPos <= 0 || nameSepPos == src.length() - 1) throw new IOException("invalid class/name/desc a in line "+reader.getLineNumber());
+						if (nameSepPos <= 0 || nameSepPos == src.length() - 1) throw new IOException("invalid class-/name-/desc-a in line "+reader.getLineNumber());
 
 						int descSepPos = src.lastIndexOf(isField ? ':' : '(');
-						if (descSepPos <= 0 || descSepPos == src.length() - 1) throw new IOException("invalid name/desc a in line "+reader.getLineNumber());
+						if (descSepPos <= 0 || descSepPos == src.length() - 1) throw new IOException("invalid name-/desc-a in line "+reader.getLineNumber());
 
 						readSeparator(reader);
 
@@ -110,11 +114,7 @@ public class JobfFileReader {
 
 						if (!srcOwner.equals(lastClass)) {
 							lastClass = srcOwner;
-							visitLastClass = visitor.visitClass(srcOwner);
-
-							if (visitLastClass) {
-								visitLastClass = visitor.visitElementContent(MappedElementKind.CLASS);
-							}
+							visitLastClass = visitor.visitClass(srcOwner) && visitor.visitElementContent(MappedElementKind.CLASS);
 						}
 
 						if (visitLastClass) {

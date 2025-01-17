@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Visitor with order implied context and consecutive dst name visits.
  *
- * <p>The visitation order is as follows (omitting visit prefixes for brevity, lowercase for cross references):
+ * <p>The visitation order is as follows (omitting visit prefixes for brevity, lowercase for cross-references):
  * <ul><li>overall: header -> content -> End -> overall
  * <li>header: Header -> Namespaces [-> Metadata]*
  * <li>content: Content [-> class|Metadata]*
@@ -47,6 +47,9 @@ import org.jetbrains.annotations.Nullable;
  * something else after a {@link #reset()}.
  *
  * <p>The same element may be visited more than once unless the flags contain {@link MappingFlag#NEEDS_ELEMENT_UNIQUENESS}.
+ *
+ * <p>If an exception is thrown during visitation, the visitor is to be considered in an invalid state.
+ * {@link #reset()} must be called to clear the internal state before further visitations can happen.
  */
 public interface MappingVisitor {
 	default Set<MappingFlag> getFlags() {
@@ -87,7 +90,7 @@ public interface MappingVisitor {
 	 *
 	 * @param srcName The fully qualified source name of the class, in internal form
 	 * (slashes instead of dots, dollar signs for delimiting inner classes).
-	 * @return Whether or not the class's content should be visited too.
+	 * @return Whether the class's content should be visited too.
 	 */
 	boolean visitClass(String srcName) throws IOException;
 	boolean visitField(String srcName, @Nullable String srcDesc) throws IOException;
@@ -97,11 +100,11 @@ public interface MappingVisitor {
 	 * Visit a parameter.
 	 *
 	 * @param argPosition Always starts at 0 and gets incremented by 1 for each additional parameter.
-	 * @param lvIndex The parameter's local variable index in the current method.
+	 * @param lvIndex The parameter's local variable index in the current method, also known as {@code slot}.
 	 * Starts at 0 for static methods, 1 otherwise. For each additional parameter,
-	 * it gets incremented by 1, or by 2 if it's a primitive {@code long} or {@code double}.
+	 * it gets incremented by 1, or by 2 if it's a double-wide primitive ({@code long} or {@code double}).
 	 * @param srcName The optional source name of the parameter.
-	 * @return Whether or not the arg's content should be visited too.
+	 * @return Whether the arg's content should be visited too.
 	 */
 	boolean visitMethodArg(int argPosition, int lvIndex, @Nullable String srcName) throws IOException;
 
@@ -112,15 +115,16 @@ public interface MappingVisitor {
 	 * (local variable table). It is optional, so -1 can be passed instead.
 	 * This is the case since LVTs themselves are optional debug information, see
 	 * <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.13">JVMS 4.7.13</a>.
-	 * @param lvIndex The var's local variable index in the current method. For each additional variable,
-	 * it gets incremented by 1, or by 2 if it's a primitive {@code long} or {@code double}.
-	 * The first variable starts where the last parameter left off (plus the offset).
+	 * @param lvIndex The var's local variable index in the current method, also known as {@code slot}.
+	 * For each additional variable, it gets incremented by 1,
+	 * or by 2 if it's a double-wide primitive ({@code long} or {@code double}).
+	 * The first variable starts at the last parameter's slot plus wideness.
 	 * @param startOpIdx Required for cases when the lvIndex alone doesn't uniquely identify a local variable.
 	 * This is the case when variables get re-defined later on, in which case most decompilers opt to
 	 * not re-define the existing var, but instead generate a new one (with both sharing the same lvIndex).
 	 * @param endOpIdx Counterpart to startOpIdx. Exclusive.
 	 * @param srcName The optional source name of the variable.
-	 * @return Whether or not the var's content should be visited too.
+	 * @return Whether the var's content should be visited too.
 	 */
 	boolean visitMethodVar(int lvtRowIndex, int lvIndex, int startOpIdx, int endOpIdx, @Nullable String srcName) throws IOException;
 

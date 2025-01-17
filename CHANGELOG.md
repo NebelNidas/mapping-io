@@ -4,10 +4,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Made `OuterClassNamePropagator` configurable
+- Made Enigma writer always output destination names if visited explicitly, establishing consistency across all writers
+- Added a simplified `MappingNsCompleter` constructor for completing all destination names with the source names
 - Added translatable `MappingFormat#getName()`
+
+## [0.7.1] - 2025-01-07
+- Restored the ability to read source-namespace-only mapping files, even if not spec-compliant
+
+## [0.7.0] - 2025-01-01
+- Added IntelliJ IDEA migration map reader and writer
+- Added `MappingFormat#features()` to allow for more fine-grained programmatic querying of format capabilities
+- Added tests to validate our writer outputs against 3rd-party readers
 - Overhauled the internal `ColumnFileReader` to behave more consistently
+- Made `VisitOrder#createByName` use alphanumeric and nest-aware sorting
 - Made handling of the `NEEDS_MULTIPLE_PASSES` flag more consistent, reducing memory usage in a few cases
 - Made some internal methods in Enigma and TSRG readers actually private
+- Renamed `OuterClassNameInheritingVisitor` to `OuterClassNamePropagator` and made its constructor public
+- Made all writers for formats which can't represent empty destination names skip such elements entirely, unless the format is hierarchical and mapped child elements are present
+- Adjusted some readers to make sure that elements aren't visited multiple times with the same data
+- Added missing visit calls to multiple readers
+- Added safeguards to `MemoryMappingTree` preventing external data modification during an ongoing visitation pass
+- Clearly defined tree-API contracts regarding returned collections' mutability
+- Fixed `MemoryMappingTree#reset()` to actually reset all its internal state related to the current visitation pass
+- Fixed and improved `MemoryMappingTree`'s merging capabilities:
+  - Fixed broken tree-API member mapping merging
+  - Fixed existing entries' data not getting overridden when merging elements via tree-API
+  - Fixed NPE when visiting with flipped namespaces ([issue 68](https://github.com/FabricMC/mapping-io/issues/68))
+  - Made merging with flipped namespaces actually work and handle both names and descriptors
+  - Fixed potentially incorrect descriptor computation by delaying until all classes are present and merged
+- Fixed duplicate mapping definitions not being handled correctly in multiple readers
+- Fixed incorrect handling of class repackaging in JOBF reader and writer
+- Removed ASM dependency from core project
 
 ## [0.6.1] - 2024-04-15
 - Fixed CSRG and JAM writers sometimes skipping elements whose parents have incomplete destination names
