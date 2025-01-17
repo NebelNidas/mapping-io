@@ -24,7 +24,6 @@ import net.fabricmc.mappingio.format.FeatureSet.ElementCommentSupport;
 import net.fabricmc.mappingio.format.FeatureSet.FeaturePresence;
 import net.fabricmc.mappingio.format.FeatureSet.MetadataSupport;
 import net.fabricmc.mappingio.i18n.Translatable;
-import net.fabricmc.mappingio.i18n.TranslatableImpl;
 
 /**
  * Represents a supported mapping format. Every format can be assumed to have an associated reader available.
@@ -281,7 +280,7 @@ public enum MappingFormat {
 
 	MappingFormat(@Nullable String fileExt, boolean hasWriter, FeatureSetBuilder featureBuilder) {
 		this.translationKey = "format." + name().toLowerCase(Locale.ROOT);
-		this.name = getName().translate(Locale.US);
+		this.name = translatableName().translate(Locale.US);
 		this.fileExt = fileExt;
 		this.hasWriter = hasWriter;
 		this.features = featureBuilder.build();
@@ -292,8 +291,8 @@ public enum MappingFormat {
 		this.supportsLocals = features.supportsVars();
 	}
 
-	public Translatable getName() {
-		return new TranslatableImpl(translationKey);
+	public Translatable translatableName() {
+		return Translatable.of(translationKey);
 	}
 
 	public FeatureSet features() {
@@ -314,7 +313,7 @@ public enum MappingFormat {
 	private final String translationKey;
 	private final FeatureSet features;
 	/**
-	 * @deprecated Use {@link #getName()} instead.
+	 * @deprecated Use {@link #translatableName()} instead.
 	 */
 	@Deprecated
 	public final String name;

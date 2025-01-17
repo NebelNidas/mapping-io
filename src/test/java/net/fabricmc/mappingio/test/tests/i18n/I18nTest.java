@@ -54,11 +54,11 @@ public class I18nTest {
 	@SuppressWarnings("deprecation")
 	public void mappingFormatNames() {
 		for (MappingFormat format : MappingFormat.values()) {
-			String enUsName = format.getName().translate(Locale.US);
+			String enUsName = format.translatableName().translate(Locale.US);
 			assertEquals(enUsName, format.name);
 
 			for (Locale locale : supportedLocales) {
-				String translatedName = format.getName().translate(locale);
+				String translatedName = format.translatableName().translate(locale);
 				assertFalse(translatedName.startsWith("format."), "Translated name for " + format + " in " + locale + " is missing");
 			}
 		}

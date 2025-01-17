@@ -18,11 +18,8 @@ package net.fabricmc.mappingio.i18n;
 
 import java.util.Locale;
 
-import org.jetbrains.annotations.ApiStatus;
-
-@ApiStatus.Internal
-public final class TranslatableImpl implements Translatable {
-	public TranslatableImpl(String translationKey) {
+final class TranslatableImpl implements Translatable {
+	TranslatableImpl(String translationKey) {
 		this.translationKey = translationKey;
 	}
 

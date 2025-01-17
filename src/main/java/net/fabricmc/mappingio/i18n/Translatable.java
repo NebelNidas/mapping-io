@@ -22,6 +22,11 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.NonExtendable
 public interface Translatable {
+	@ApiStatus.Internal
+	static Translatable of(String translationKey) {
+		return new TranslatableImpl(translationKey);
+	}
+
 	/**
 	 * Translates this translatable to the specified locale, with a fallback to en_US.
 	 */
