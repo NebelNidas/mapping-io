@@ -123,11 +123,11 @@ public final class SrgFileWriter implements MappingWriter {
 			write("CL: ");
 			break;
 		case FIELD:
-			if (memberSrcDesc == null || memberDstName == null || (xsrg && memberDstDesc == null)) return false;
+			if (memberDstName == null || xsrg && (memberSrcDesc == null || memberDstDesc == null)) return false;
 			write("FD: ");
 			break;
 		case METHOD:
-			if (memberSrcDesc == null || memberDstName == null || memberDstDesc == null) return false;
+			if (memberDstName == null || memberSrcDesc == null || memberDstDesc == null) return false;
 			write("MD: ");
 			break;
 		default:
