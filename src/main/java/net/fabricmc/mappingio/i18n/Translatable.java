@@ -34,7 +34,7 @@ public interface Translatable {
 
 	/**
 	 * Returns the translation key of this translatable, allowing consumers to provide their own translations
-	 * via custom translation facilities.
+	 * via custom localization facilities.
 	 */
 	String translationKey();
 }

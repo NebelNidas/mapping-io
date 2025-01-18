@@ -309,15 +309,16 @@ public enum MappingFormat {
 		return "*."+fileExt;
 	}
 
-	public final boolean hasWriter;
 	private final String translationKey;
 	private final FeatureSet features;
+
 	/**
 	 * @deprecated Use {@link #translatableName()} instead.
 	 */
 	@Deprecated
 	public final String name;
 
+	public final boolean hasWriter;
 	@Nullable
 	public final String fileExt;
 
