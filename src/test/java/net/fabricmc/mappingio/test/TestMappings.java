@@ -56,8 +56,8 @@ public class TestMappings {
 			delegate.visitNamespaces(MappingUtil.NS_SOURCE_FALLBACK, Arrays.asList(MappingUtil.NS_TARGET_FALLBACK, MappingUtil.NS_TARGET_FALLBACK + "2"));
 			delegate.visitMetadata("name", "valid");
 			delegate.visitMetadata(MigrationMapConstants.ORDER_KEY, MigrationMapConstants.DEFAULT_ORDER);
-			delegate.visitMetadata("key-with-empty-value", "");
-			delegate.visitMetadata("key-with-null-value", null);
+			delegate.visitMetadata("property-with-empty-value", "");
+			delegate.visitMetadata("property-with-null-value", null);
 		}
 
 		if (delegate.visitContent()) {
