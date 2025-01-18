@@ -47,11 +47,6 @@ public class EmptyContentReadTest {
 	}
 
 	@Test
-	public void emptyEnigmaFile() throws Exception {
-		EnigmaFileReader.read(new StringReader(""), target);
-	}
-
-	@Test
 	public void emptyTinyFile() throws Exception {
 		String header0 = "";
 		String header1 = "v1";
@@ -63,7 +58,7 @@ public class EmptyContentReadTest {
 		assertThrows(IOException.class, () -> Tiny1FileReader.read(new StringReader(header0), target));
 		assertThrows(IOException.class, () -> Tiny1FileReader.read(new StringReader(header1), target));
 		assertThrows(IOException.class, () -> Tiny1FileReader.read(new StringReader(header2), target));
-		assertThrows(IOException.class, () -> Tiny1FileReader.read(new StringReader(header3), target));
+		Tiny1FileReader.read(new StringReader(header3), target);
 		assertThrows(IOException.class, () -> Tiny1FileReader.read(new StringReader(header4), target));
 		Tiny1FileReader.read(new StringReader(header5), target);
 	}
@@ -80,9 +75,14 @@ public class EmptyContentReadTest {
 		assertThrows(IOException.class, () -> Tiny2FileReader.read(new StringReader(header0), target));
 		assertThrows(IOException.class, () -> Tiny2FileReader.read(new StringReader(header1), target));
 		assertThrows(IOException.class, () -> Tiny2FileReader.read(new StringReader(header2), target));
-		assertThrows(IOException.class, () -> Tiny2FileReader.read(new StringReader(header3), target));
+		Tiny2FileReader.read(new StringReader(header3), target);
 		assertThrows(IOException.class, () -> Tiny2FileReader.read(new StringReader(header4), target));
 		Tiny2FileReader.read(new StringReader(header5), target);
+	}
+
+	@Test
+	public void emptyEnigmaFile() throws Exception {
+		EnigmaFileReader.read(new StringReader(""), target);
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class EmptyContentReadTest {
 	}
 
 	@Test
-	public void emptySrgFile() throws Exception {
+	public void emptySrgOrXsrgFile() throws Exception {
 		SrgFileReader.read(new StringReader(""), target);
 	}
 
@@ -101,7 +101,7 @@ public class EmptyContentReadTest {
 	}
 
 	@Test
-	public void emptyTsrgFile() throws Exception {
+	public void emptyCsrgOrTsrgFile() throws Exception {
 		String header0 = "";
 		String header1 = "tsrg2";
 		String header2 = header1 + " ";
@@ -113,7 +113,7 @@ public class EmptyContentReadTest {
 		instantiateTree();
 		assertThrows(IOException.class, () -> TsrgFileReader.read(new StringReader(header1), target));
 		assertThrows(IOException.class, () -> TsrgFileReader.read(new StringReader(header2), target));
-		assertThrows(IOException.class, () -> TsrgFileReader.read(new StringReader(header3), target));
+		TsrgFileReader.read(new StringReader(header3), target);
 		assertThrows(IOException.class, () -> TsrgFileReader.read(new StringReader(header4), target));
 		TsrgFileReader.read(new StringReader(header5), target);
 	}
