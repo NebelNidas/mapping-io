@@ -5,6 +5,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Made `OuterClassNamePropagator` configurable
+- Made Enigma writer always output destination names if visited explicitly, establishing consistency across all writers
 - Added `MappingTree#propagateOuterClassNames` as a more efficient tree-API alternative to `OuterClassNamePropagator`
 - Added a simplified `MappingNsCompleter` constructor for completing all destination names with the source names
 
