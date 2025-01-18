@@ -91,7 +91,7 @@ public final class TsrgFileWriter implements MappingWriter {
 
 	@Override
 	public boolean visitMethod(String srcName, @Nullable String srcDesc) throws IOException {
-		if (srcDesc == null && !tsrg2) {
+		if (srcDesc == null) {
 			return false;
 		}
 
@@ -130,11 +130,6 @@ public final class TsrgFileWriter implements MappingWriter {
 
 	@Override
 	public boolean visitElementContent(MappedElementKind targetKind) throws IOException {
-		if (targetKind == MappedElementKind.METHOD && memberSrcDesc == null) {
-			assert tsrg2;
-			return true;
-		}
-
 		if (classContentVisitPending && targetKind != MappedElementKind.CLASS && hasAnyDstNames) {
 			String[] memberOrArgDstNames = dstNames.clone();
 			Arrays.fill(dstNames, clsSrcName);

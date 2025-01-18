@@ -122,7 +122,6 @@ public final class JobfFileWriter implements MappingWriter {
 			write("c ");
 		} else if ((isField = targetKind == MappedElementKind.FIELD)
 				|| targetKind == MappedElementKind.METHOD) {
-			if (memberSrcDesc == null) return false;
 			write(isField ? "f " : "m ");
 		} else {
 			throw new IllegalStateException("unexpected invocation for "+targetKind);
