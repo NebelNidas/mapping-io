@@ -28,5 +28,10 @@ final class TranslatableImpl implements Translatable {
 		return I18n.translate(translationKey, locale);
 	}
 
+	@Override
+	public String translationKey() {
+		return translationKey;
+	}
+
 	private final String translationKey;
 }

@@ -31,4 +31,11 @@ public interface Translatable {
 	 * Translates this translatable to the specified locale, with a fallback to en_US.
 	 */
 	String translate(Locale locale);
+
+	/**
+	 * Returns the translation key of this translatable, allowing consumers provide a custom translation.
+	 *
+	 * <p>No guarantees about the stability of this value across major library versions are made.
+	 */
+	String translationKey();
 }
