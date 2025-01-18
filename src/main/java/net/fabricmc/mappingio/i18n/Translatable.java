@@ -33,7 +33,8 @@ public interface Translatable {
 	String translate(Locale locale);
 
 	/**
-	 * Returns the translation key of this translatable, allowing consumers provide a custom translation.
+	 * Returns the translation key of this translatable, allowing consumers to provide their own translations
+	 * via custom translation facilities.
 	 *
 	 * <p>No guarantees about the stability of this value across major library versions are made.
 	 */
