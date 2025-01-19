@@ -71,6 +71,10 @@ public final class SrgFileWriter implements MappingWriter {
 
 	@Override
 	public boolean visitField(String srcName, @Nullable String srcDesc) throws IOException {
+		if (xsrg && srcDesc == null) {
+			return false;
+		}
+
 		memberSrcName = srcName;
 		memberSrcDesc = srcDesc;
 		memberDstName = null;
@@ -81,6 +85,10 @@ public final class SrgFileWriter implements MappingWriter {
 
 	@Override
 	public boolean visitMethod(String srcName, @Nullable String srcDesc) throws IOException {
+		if (srcDesc == null) {
+			return false;
+		}
+
 		memberSrcName = srcName;
 		memberSrcDesc = srcDesc;
 		memberDstName = null;
@@ -143,11 +151,11 @@ public final class SrgFileWriter implements MappingWriter {
 			write("CL: ");
 			break;
 		case FIELD:
-			if (memberSrcDesc == null || memberDstName == null || (xsrg && memberDstDesc == null)) return false;
+			if (memberDstName == null || xsrg && memberDstDesc == null) return false;
 			write("FD: ");
 			break;
 		case METHOD:
-			if (memberSrcDesc == null || memberDstName == null || memberDstDesc == null) return false;
+			if (memberDstName == null || memberDstDesc == null) return false;
 			write("MD: ");
 			break;
 		default:

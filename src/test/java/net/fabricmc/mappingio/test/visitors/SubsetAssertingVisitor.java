@@ -269,6 +269,7 @@ public class SubsetAssertingVisitor implements FlatMappingVisitor {
 		boolean subHasDstNames = subFeatures.fields().dstNames() != FeaturePresence.ABSENT;
 		boolean supHasDstDescs = supFeatures.fields().dstDescs() != FeaturePresence.ABSENT;
 		boolean subHasDstDescs = subFeatures.fields().dstDescs() != FeaturePresence.ABSENT;
+		boolean supRequiresSrcDescs = supFeatures.fields().srcDescs() == FeaturePresence.REQUIRED;
 
 		if (supFld == null) { // supTree doesn't have this field, ensure the incoming mappings don't have any data for it
 			String[] subDstNames = null;
@@ -277,8 +278,11 @@ public class SubsetAssertingVisitor implements FlatMappingVisitor {
 			if (supHasDstNames && subHasDstNames) subDstNames = supFeatures.hasNamespaces() || dstNames == null ? dstNames : new String[]{dstNames[subNsIfSupNotNamespaced]};
 			if (supHasDstDescs && subHasDstDescs) subDstDescs = supFeatures.hasNamespaces() || dstDescs == null ? dstDescs : new String[]{dstDescs[subNsIfSupNotNamespaced]};
 
-			assertTrue(isEmpty(subDstNames) && isEmpty(subDstDescs), "Incoming field not contained in supTree: " + subFldId);
-			return true; // ensure there is no element content
+			boolean noData = isEmpty(subDstNames) && isEmpty(subDstDescs);
+			boolean missingRequiredSrcDesc = supRequiresSrcDescs && srcDesc == null;
+
+			assertTrue(noData || missingRequiredSrcDesc, "Incoming field not contained in supTree: " + subFldId);
+			return !missingRequiredSrcDesc; // ensure there is no element content
 		}
 
 		String supFldId = srcClsName + "#" + srcName + ":" + supFld.getSrcDesc();
@@ -355,6 +359,7 @@ public class SubsetAssertingVisitor implements FlatMappingVisitor {
 		boolean subHasDstNames = subFeatures.methods().dstNames() != FeaturePresence.ABSENT;
 		boolean supHasDstDescs = supFeatures.methods().dstDescs() != FeaturePresence.ABSENT;
 		boolean subHasDstDescs = subFeatures.methods().dstDescs() != FeaturePresence.ABSENT;
+		boolean supRequiresSrcDescs = supFeatures.methods().srcDescs() == FeaturePresence.REQUIRED;
 
 		if (supMth == null) { // supTree doesn't have this method, ensure the incoming mappings don't have any data for it
 			String[] subDstNames = null;
@@ -363,8 +368,11 @@ public class SubsetAssertingVisitor implements FlatMappingVisitor {
 			if (supHasDstNames && subHasDstNames) subDstNames = supFeatures.hasNamespaces() || dstNames == null ? dstNames : new String[]{dstNames[subNsIfSupNotNamespaced]};
 			if (supHasDstDescs && subHasDstDescs) subDstDescs = supFeatures.hasNamespaces() || dstDescs == null ? dstDescs : new String[]{dstDescs[subNsIfSupNotNamespaced]};
 
-			assertTrue(isEmpty(subDstNames) && isEmpty(subDstDescs), "Incoming method not contained in supTree: " + subMthId);
-			return true; // ensure there is no element content
+			boolean noData = isEmpty(subDstNames) && isEmpty(subDstDescs);
+			boolean missingRequiredSrcDesc = supRequiresSrcDescs && srcDesc == null;
+
+			assertTrue(noData || missingRequiredSrcDesc, "Incoming method not contained in supTree: " + subMthId);
+			return !missingRequiredSrcDesc; // ensure there is no element content
 		}
 
 		String supMthId = srcClsName + "#" + srcName + supMth.getSrcDesc();
