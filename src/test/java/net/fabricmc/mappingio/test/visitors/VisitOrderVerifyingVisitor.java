@@ -288,7 +288,7 @@ public class VisitOrderVerifyingVisitor extends ForwardingMappingVisitor {
 	public boolean visitElementContent(MappedElementKind targetKind) throws IOException {
 		assertElementVisited(targetKind);
 		assertLastVisitedElement(targetKind);
-		assertElementContentNotVisitedDownTo(targetKind.level + 1); // prevent visitation after visitElementContent of same level
+		assertElementContentNotVisitedDownTo(targetKind.level); // no +1 to prevent repeated visitation
 
 		if (targetKind.level > 0) {
 			assertElementContentVisited(targetKind.level - 1);

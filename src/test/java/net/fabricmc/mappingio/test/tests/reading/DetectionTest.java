@@ -16,6 +16,7 @@
 
 package net.fabricmc.mappingio.test.tests.reading;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -43,7 +44,7 @@ public class DetectionTest {
 			if (format == MappingFormat.RECAF_SIMPLE_FILE) {
 				assertThrows(AssertionFailedError.class, () -> check(format));
 			} else {
-				check(format);
+				assertDoesNotThrow(() -> check(format), "Failed for " + format);
 			}
 		}
 	}

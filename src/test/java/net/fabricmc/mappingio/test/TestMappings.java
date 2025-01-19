@@ -100,6 +100,13 @@ public class TestMappings {
 			}
 
 			@Override
+			public boolean visitPackage(String srcName) throws IOException {
+				replayQueue.clear();
+				replayQueue.add(Unchecked.runnable(() -> super.visitPackage(srcName)));
+				return super.visitPackage(srcName);
+			}
+
+			@Override
 			public boolean visitClass(String srcName) throws IOException {
 				replayQueue.clear();
 
@@ -470,5 +477,10 @@ public class TestMappings {
 		}
 
 		public abstract <T extends MappingVisitor> T generate(T target) throws IOException;
+
+		@Override
+		public String toString() {
+			return TestUtil.getResource("/").relativize(path).toString();
+		}
 	}
 }
