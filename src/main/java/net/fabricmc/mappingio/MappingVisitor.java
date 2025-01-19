@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
  * <ul><li>overall: header -> content -> End -> overall
  * <li>header: Header -> Namespaces [-> Metadata]*
  * <li>content: Content [-> package|class|Metadata]*
- * <li>package: Package [-> DstName]* -> ElementContent [-> Comment]*
+ * <li>package: Package [-> DstName]* -> ElementContent [-> Comment]
  * <li>class: Class [-> DstName]* -> ElementContent [-> field|method|Comment]*
  * <li>field: Field [-> DstName|DstDesc]* -> ElementContent [-> Comment]
  * <li>method: Method [-> DstName|DstDesc]* -> ElementContent [-> arg|var|Comment]*
