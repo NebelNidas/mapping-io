@@ -112,11 +112,35 @@ public class SubsetAssertingVisitor implements FlatMappingVisitor {
 		PackageMappingView supPkg = supTree.getPackage(srcName);
 		boolean supHasDstNames = supFeatures.packages().dstNames() != FeaturePresence.ABSENT;
 		boolean subHasDstNames = subFeatures.packages().dstNames() != FeaturePresence.ABSENT;
+		boolean supHasStructureModification = supFeatures.packages().hasStructureModification();
 
 		if (supPkg == null) { // supTree doesn't have this package, ensure the incoming mappings don't have any data for it
 			if (supHasDstNames && subHasDstNames) {
 				String[] subDstNames = supFeatures.hasNamespaces() || dstNames == null ? dstNames : new String[]{dstNames[subNsIfSupNotNamespaced]};
-				assertTrue(isEmpty(subDstNames), "Incoming package not contained in supTree: " + srcName);
+
+				if (!isEmpty(subDstNames)) {
+					boolean error = true;
+
+					if (!supHasStructureModification) {
+						int srcNameSlashCount = countOccurrences(srcName, '/');
+
+						for (String subDstName : subDstNames) {
+							if (subDstName != null) {
+								if (countOccurrences(subDstName, '/') == srcNameSlashCount) {
+									error = true;
+									break;
+								} else {
+									// The incoming package has been moved, which supFormat doesn't support, that's why it's missing from supTree
+									error = false;
+								}
+							}
+						}
+					}
+
+					if (error) {
+						throw new AssertionError("Incoming package not contained in supTree: " + srcName);
+					}
+				}
 			}
 
 			return true; // ensure there is no element content
@@ -611,6 +635,16 @@ public class SubsetAssertingVisitor implements FlatMappingVisitor {
 		}
 
 		return true;
+	}
+
+	private int countOccurrences(String str, char c) {
+		int count = 0;
+
+		for (int i = 0; i < str.length(); i++) {
+			if (str.charAt(i) == c) count++;
+		}
+
+		return count;
 	}
 
 	@Nullable

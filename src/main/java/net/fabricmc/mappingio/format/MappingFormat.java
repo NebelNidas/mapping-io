@@ -141,7 +141,8 @@ public enum MappingFormat {
 	SRG_FILE("SRG file", "srg", true, FeatureSetBuilder.create()
 			.withPackages(p -> p
 					.withSrcNames(FeaturePresence.REQUIRED)
-					.withDstNames(FeaturePresence.REQUIRED))
+					.withDstNames(FeaturePresence.REQUIRED)
+					.withStructureModification(true))
 			.withClasses(c -> c
 					.withSrcNames(FeaturePresence.REQUIRED)
 					.withDstNames(FeaturePresence.REQUIRED)
@@ -172,7 +173,8 @@ public enum MappingFormat {
 	JAM_FILE("JAM file", "jam", true, FeatureSetBuilder.createFrom(SRG_FILE.features)
 			.withPackages(p -> p
 					.withSrcNames(FeaturePresence.ABSENT)
-					.withDstNames(FeaturePresence.ABSENT))
+					.withDstNames(FeaturePresence.ABSENT)
+					.withStructureModification(false))
 			.withFields(f -> f
 					.withSrcDescs(FeaturePresence.REQUIRED))
 			.withMethods(m -> m
@@ -220,7 +222,8 @@ public enum MappingFormat {
 			.withFileMetadata(MetadataSupport.FIXED) // migration map name and description
 			.withPackages(p -> p
 					.withSrcNames(FeaturePresence.REQUIRED)
-					.withDstNames(FeaturePresence.REQUIRED))
+					.withDstNames(FeaturePresence.REQUIRED)
+					.withStructureModification(true))
 			.withClasses(c -> c
 					.withSrcNames(FeaturePresence.REQUIRED)
 					.withDstNames(FeaturePresence.REQUIRED)

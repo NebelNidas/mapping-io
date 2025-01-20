@@ -84,7 +84,7 @@ public class JobfFileReader {
 							String dstName = reader.nextCol();
 							if (dstName == null || dstName.isEmpty()) throw new IOException("missing package-name-b in line "+reader.getLineNumber());
 
-							visitor.visitDstName(MappedElementKind.PACKAGE, 0, dstName);
+							visitor.visitDstName(MappedElementKind.PACKAGE, 0, dstName.replace('.', '/'));
 							visitor.visitElementContent(MappedElementKind.PACKAGE);
 						}
 					} else if (reader.nextCol("c")) { // class: c <pkg>.<cls-name-a> = <cls-name-b>

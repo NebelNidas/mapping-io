@@ -121,7 +121,12 @@ public final class JobfFileWriter implements MappingWriter {
 		}
 
 		if (isPackage) {
+			if (countOccurrences(packageSrcName, '/') != countOccurrences(dstName, '/')) {
+				return false; // JOBF doesn't allow changes to the package structure
+			}
+
 			packageSrcName = packageSrcName.replace('/', '.');
+			dstName = dstName.replace('/', '.');
 			write("p ");
 		} else if (isClass) {
 			int srcNameLastSep = classSrcName.lastIndexOf('/');
@@ -170,6 +175,16 @@ public final class JobfFileWriter implements MappingWriter {
 
 	private void writeLn() throws IOException {
 		writer.write('\n');
+	}
+
+	private int countOccurrences(String str, char c) {
+		int count = 0;
+
+		for (int i = 0; i < str.length(); i++) {
+			if (str.charAt(i) == c) count++;
+		}
+
+		return count;
 	}
 
 	private static final Set<MappingFlag> flags = EnumSet.of(MappingFlag.NEEDS_SRC_FIELD_DESC, MappingFlag.NEEDS_SRC_METHOD_DESC);

@@ -64,7 +64,11 @@ public class TestMappings {
 			int[] dstNs = new int[] { 0, 1 };
 			NameGen nameGen = new NameGen();
 
-			if (nameGen.visitPackage(delegate, dstNs)) {
+			if (nameGen.visitPackage(delegate, 0, dstNs)) {
+				nameGen.visitComment(delegate);
+			}
+
+			if (nameGen.visitPackage(delegate, 1, dstNs)) {
 				nameGen.visitComment(delegate);
 			}
 
@@ -200,8 +204,18 @@ public class TestMappings {
 			NameGen nameGen = new NameGen();
 
 			// Packages
-			nameGen.visitPackage(delegate, 0);
-			nameGen.visitPackage(delegate, 1);
+			nameGen.visitPackage(delegate, 0, 0);
+			nameGen.visitPackage(delegate, 0, 0);
+			nameGen.visitPackage(delegate, 0, 0);
+
+			nameGen.visitPackage(delegate, 0, 1);
+			nameGen.visitPackage(delegate, 0, 1);
+			nameGen.visitPackage(delegate, 0, 1);
+
+			nameGen.visitPackage(delegate, 1, 0);
+			nameGen.visitPackage(delegate, 1, 0);
+			nameGen.visitPackage(delegate, 1, 0);
+			nameGen.visitPackage(delegate, 1, 0);
 
 			// (Inner) Classes
 			for (int nestLevel = 0; nestLevel <= 2; nestLevel++) {
